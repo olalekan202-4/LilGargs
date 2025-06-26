@@ -12,17 +12,30 @@ const __dirname = path.dirname(__filename);
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(), // Using tailwindcss as a Vite plugin
+    tailwindcss(),
   ],
+   server: {
+    proxy: {
+      // Proxy requests from /api to the Gensuki API server
+      '/api': {
+        target: 'https://api.gensuki.xyz',
+        changeOrigin: true, // Needed for virtual hosted sites
+        secure: false,      // If the target API has a self-signed certificate
+        ws: true,           // If you want to proxy websockets
+      }
+    }
+  },
   resolve: {
     alias: {
       buffer: path.resolve(__dirname, 'node_modules/buffer/index.js'),
       util: path.resolve(__dirname, 'node_modules/util/util.js'),
       stream: path.resolve(__dirname, 'node_modules/stream-browserify/index.js'),
+      // Add polyfill for the 'http' module
+      http: path.resolve(__dirname, 'node_modules/stream-http/index.js'),
     },
   },
   optimizeDeps: {
-    include: ["buffer", "util", "stream-browserify"],
+    include: ["buffer", "util", "stream-browserify", "stream-http"],
   },
   define: {
     global: 'window',
