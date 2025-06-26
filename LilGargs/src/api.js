@@ -64,8 +64,11 @@ export const fetchCollectionAssets = async () => {
         throw new Error(`Error fetching collection assets: ${response.status} ${response.statusText} - ${errorText}`);
       }
       const data = await response.json();
-      // The API returns an object with a 'data' property which is the array of NFTs
-      return data.data || [];
+      console.log("Raw response from /api/assets:", data); // For debugging
+      
+      // FIX: The console log shows the array is in the 'nfts' property.
+      return data.nfts || [];
+
     } catch (error) {
       console.error("Failed to fetch collection assets:", error);
       throw error;
@@ -97,8 +100,11 @@ export const fetchUserAssets = async (userAddress) => {
         throw new Error(`Error fetching user assets: ${response.status} ${response.statusText} - ${errorText}`);
     }
      const data = await response.json();
-    // The API returns an object with a 'data' property which is the array of NFTs
-    return data.data || [];
+     console.log("Raw response from /api/wallets:", data); // For debugging
+
+    // FIX: Assuming the wallets API also uses the 'nfts' property for consistency.
+    return data.nfts || [];
+
   } catch (error) {
     console.error("Failed to fetch user assets:", error);
     throw error;

@@ -16,7 +16,7 @@ import MintButton from "./components/MintButton";
 import { useGensuki } from './hooks/useGensuki';
 
 // Mainnet RPC endpoint for production
-const network = "https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY_HERE"; // IMPORTANT: Use a reliable mainnet RPC
+const network = "https://mainnet.helius-rpc.com/?api-key=ALqazXdcf4sB3oAkJWYaVVPJuarLyhEXn6yQR3RxFjjU"; // IMPORTANT: Use a reliable mainnet RPC
 
 function App() {
   const wallet = useWallet();
@@ -24,11 +24,11 @@ function App() {
   const [messageType, setMessageType] = useState('info');
 
   // --- Use the new Gensuki hook ---
-  const { 
-    launchpadInfo, 
-    collectionNfts, 
-    ownedNfts, 
-    loading, 
+  const {
+    launchpadInfo,
+    collectionNfts,
+    ownedNfts,
+    loading,
     error,
     refresh
   } = useGensuki(wallet.publicKey?.toBase58());
@@ -38,7 +38,7 @@ function App() {
     setMessageType(type);
     setTimeout(() => setMessage(''), 5000);
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col font-sans">
       <MessageDisplay
@@ -48,10 +48,16 @@ function App() {
       />
 
       <Navbar />
-      
+
       {/* --- Dynamic Mint Details Section --- */}
-      <MintDetails launchpadInfo={launchpadInfo} loading={loading} error={error} />
-      
+      <MintDetails
+        launchpadInfo={launchpadInfo}
+        loading={loading}
+        error={error}
+        // Pass collectionNfts to calculate available supply
+        collectionNfts={collectionNfts}
+      />
+
       <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
         {/* --- Dynamic Minting Section --- */}
         {wallet.connected && (
@@ -60,9 +66,13 @@ function App() {
           </div>
         )}
 
-        {/* --- Available NFTs from API --- */}
+        {/* --- Collection Gallery Section --- */}
         <section className="mt-16">
-          <h2 className="text-3xl font-bold mb-8 text-emerald-300 text-center">Lil Gargs OGs Collection</h2>
+          <h2 className="text-3xl font-bold mb-2 text-emerald-300 text-center">Lil Gargs OGs Collection</h2>
+          {/* Explanatory text added */}
+          <p className="text-center text-gray-400 mb-8 max-w-2xl mx-auto">
+            This is a preview of the NFTs in the collection. Minting will grant you a randomly selected NFT.
+          </p>
           <NFTGallery
             nfts={collectionNfts}
             loading={loading}
@@ -71,7 +81,7 @@ function App() {
           />
         </section>
 
-        {/* --- Owned NFTs from API --- */}
+        {/* --- Owned NFTs Section --- */}
         {wallet.connected && (
           <section className="mt-16">
             <h2 className="text-3xl font-bold mb-8 text-indigo-300 text-center">Your Owned NFTs</h2>
