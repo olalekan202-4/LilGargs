@@ -43,7 +43,7 @@ const Footer = () => {
                 <div className="flex justify-center gap-6 my-6 text-xs">
                     <a href="YOUR_TERMS_LINK_HERE" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Terms & Conditions</a>
                     <span className="text-gray-600">|</span>
-                    <a href="mailto:your_email@example.com" className="hover:text-white transition-colors">Contact Us</a>
+                    <a href="mailto:MiniCreaturestudio@gmail.com" className="hover:text-white transition-colors">Contact Us</a>
                 </div>
 
                 <p className="text-xs">&copy; {new Date().getFullYear()} Lil Gargs. All rights reserved.</p>
