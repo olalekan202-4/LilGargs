@@ -1,2 +1,46 @@
+@keyframes move-stars {
+  from { background-position: 0 0; }
+  to { background-position: -10000px 5000px; }
+}
+
+/* Style the body or your main app container */
+body {
+  background-color: #0c0a09; /* A deep space black */
+  background-image: 
+    url('https://www.transparenttextures.com/patterns/stardust.png'), /* Layer 1: Your existing stars */
+    radial-gradient(ellipse at 70% 30%, rgba(139, 92, 246, 0.3) 0%, rgba(139, 92, 246, 0) 60%), /* Layer 2: Purple Nebula */
+    radial-gradient(ellipse at 30% 70%, rgba(59, 130, 246, 0.25) 0%, rgba(59, 130, 246, 0) 50%); /* Layer 3: Blue Nebula */
+  
+  animation: move-stars 200s linear infinite;
+}
+
 @import "tailwindcss";
 @import "@solana/wallet-adapter-react-ui/styles.css";
+
+@keyframes animated-border {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.nft-card-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  background: conic-gradient(from 0deg, #a855f7, #6366f1, #3b82f6, #a855f7);
+  z-index: -1;
+  border-radius: 14px; 
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  animation: animated-border 8s linear infinite;
+}
+
+.nft-card-wrapper:hover::before {
+  opacity: 1;
+}

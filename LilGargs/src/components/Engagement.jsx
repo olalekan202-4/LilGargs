@@ -2,12 +2,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const Engagement = ({ unclaimedGarg, ogCount }) => {
+// Receive totalMiningRate as a new prop
+const Engagement = ({ unclaimedGarg, ogCount, totalMiningRate }) => {
 
     const handleShare = () => {
         const siteUrl = "YOUR_SITE_URL_HERE"; // Replace with your actual site URL
-        // Dynamically create the tweet text with live data
-        const tweetText = `I'm mining $GARG with my ${ogCount} Lil’ Gargs OG(s) and have already earned ${unclaimedGarg.toFixed(4)} $GARG! 💎 Join the cosmic rebellion 👉 ${siteUrl}`;
+
+        // Updated tweet text to include the mining rate
+        const tweetText = `I'm mining $GARG at a rate of ${totalMiningRate.toFixed(6)}/sec with my ${ogCount} Lil’ Gargs OG(s) and have already earned ${unclaimedGarg.toFixed(4)} $GARG! 💎 Join the cosmic rebellion 👉 ${siteUrl}`;
+        
         const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
         window.open(twitterUrl, '_blank');
     };
@@ -21,7 +24,7 @@ const Engagement = ({ unclaimedGarg, ogCount }) => {
         >
             <h2 className="text-3xl font-bold text-center text-white mb-6">Join the Rebellion</h2>
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-                {/* Only show the share button if the user has OGs to share */}
+                {/* This button is only shown if the user owns at least one OG NFT */}
                 {ogCount > 0 && (
                     <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -35,7 +38,7 @@ const Engagement = ({ unclaimedGarg, ogCount }) => {
                 <motion.a
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    href="https://discord.gg/HzsdJ8fd6M"
+                    href="https://discord.gg/HzsdJ8fd6M" 
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-8 py-3 bg-purple-700 text-white font-bold rounded-xl shadow-lg hover:bg-purple-800 transition-colors"

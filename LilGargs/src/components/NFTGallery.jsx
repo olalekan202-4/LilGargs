@@ -1,5 +1,5 @@
 // src/components/NFTGallery.jsx
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const NFTDetailModal = ({ nft, onClose, onPurchase }) => {
@@ -34,7 +34,7 @@ const NFTDetailModal = ({ nft, onClose, onPurchase }) => {
                         <button 
                             onClick={() => onPurchase(nft)} 
                             className="w-full px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg hover:bg-emerald-500 transition disabled:bg-gray-500 disabled:cursor-not-allowed"
-                            disabled // This will be enabled once purchase logic is implemented
+                            disabled
                         >
                             Purchase
                         </button>
@@ -49,38 +49,65 @@ const NFTDetailModal = ({ nft, onClose, onPurchase }) => {
 
 const NFTCard = ({ nft, onSelect }) => {
     const imageUrl = nft.image || nft.imageUrl || "https://placehold.co/300x300/312e81/ffffff?text=No+Image";
+    const primaryAttribute = nft.attributes && nft.attributes.length > 0 ? nft.attributes[0] : null;
+
+    // --- NEW LOGIC TO FORMAT THE NFT NAME ---
+    const formatDisplayName = (name) => {
+        if (!name) return 'Unnamed NFT';
+        // Check for the specific prefix and remove it
+        if (name.includes('Lil Gargs OGs-legacy')) {
+            const number = name.replace('Lil Gargs OGs-legacy', '').trim();
+            return `${number}`;
+        }
+        // If the prefix isn't there, return the original name
+        return name;
+    };
+
+    const displayName = formatDisplayName(nft.name);
 
     return (
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-purple-500/30 transition-shadow duration-300 group"
-        >
-            <div className="w-full h-64 overflow-hidden">
-                 <img
-                    src={imageUrl}
-                    alt={nft.name || 'NFT Image'}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/300x300/312e81/ffffff?text=NFT'; }}
-                />
-            </div>
-            <div className="p-4">
-                <h3 className="text-lg font-bold text-white truncate">{nft.name || 'Unnamed NFT'}</h3>
-                {nft.description && <p className="text-sm text-gray-400 mt-1 h-10 overflow-hidden">{nft.description}</p>}
-                <button 
-                    onClick={() => onSelect(nft)} 
-                    className="w-full mt-4 px-4 py-2 bg-purple-600 text-white text-sm font-bold rounded-lg hover:bg-purple-700 transition"
-                >
-                    Inspect
-                </button>
-            </div>
-        </motion.div>
+        <div className="relative nft-card-wrapper">
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="bg-gray-800 rounded-xl overflow-hidden shadow-lg h-full flex flex-col"
+            >
+                <div className="w-full h-64 overflow-hidden group">
+                     <img
+                        src={imageUrl}
+                        alt={nft.name || 'NFT Image'}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/300x300/312e81/ffffff?text=NFT'; }}
+                    />
+                </div>
+                <div className="p-4 flex flex-col flex-grow">
+                    {/* Use the new displayName variable here */}
+                    <h3 className="text-lg font-bold text-white truncate">{displayName}</h3>
+                    
+                    {primaryAttribute ? (
+                        <div className="text-sm text-purple-300 mt-1 h-10 overflow-hidden">
+                            <span className="font-bold text-gray-400 capitalize">{primaryAttribute.trait_type}: </span>
+                            {primaryAttribute.value}
+                        </div>
+                    ) : (
+                        nft.description && <p className="text-sm text-gray-400 mt-1 h-10 overflow-hidden">{nft.description}</p>
+                    )}
+
+                    <button 
+                        onClick={() => onSelect(nft)} 
+                        className="w-full mt-auto pt-2 px-4 py-2 bg-purple-600 text-white text-sm font-bold rounded-lg hover:bg-purple-700 transition"
+                    >
+                        Inspect
+                    </button>
+                </div>
+            </motion.div>
+        </div>
     );
 };
 
 
-const NFTGallery = ({ nfts, loading, error, title }) => { // Added 'title' prop here
+const NFTGallery = ({ nfts, loading, error, title }) => {
     const [selectedNft, setSelectedNft] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10; 
@@ -109,8 +136,7 @@ const NFTGallery = ({ nfts, loading, error, title }) => { // Added 'title' prop 
     }
 
     if (!Array.isArray(nfts) || nfts.length === 0) {
-        // Only show "No NFTs found" if a title is present, otherwise render nothing
-        return title ? <div className="text-center p-10 bg-gray-800/50 rounded-lg"><p className="text-xl text-gray-400">No NFTs found.</p></div> : null;
+        return title ? <div className="text-center p-10 my-16 bg-gray-800/50 rounded-lg"><p className="text-xl text-gray-400">No NFTs found.</p></div> : null;
     }
     
     const pageCount = Math.ceil(nfts.length / pageSize);
@@ -122,7 +148,6 @@ const NFTGallery = ({ nfts, loading, error, title }) => { // Added 'title' prop 
 
     return (
         <section className="my-16">
-            {/* THIS IS THE NEW HEADING */}
             {title && <h2 className="text-3xl font-bold text-center text-white mb-8">{title}</h2>}
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
