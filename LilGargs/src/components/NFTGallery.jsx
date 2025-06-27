@@ -1,5 +1,6 @@
 // src/components/NFTGallery.jsx
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 const NFTDetailModal = ({ nft, onClose, onPurchase }) => {
     if (!nft) return null;
@@ -50,7 +51,12 @@ const NFTCard = ({ nft, onSelect }) => {
     const imageUrl = nft.image || nft.imageUrl || "https://placehold.co/300x300/312e81/ffffff?text=No+Image";
 
     return (
-        <div className="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-purple-500/30 transition-shadow duration-300 group">
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-purple-500/30 transition-shadow duration-300 group"
+        >
             <div className="w-full h-64 overflow-hidden">
                  <img
                     src={imageUrl}
@@ -69,24 +75,21 @@ const NFTCard = ({ nft, onSelect }) => {
                     Inspect
                 </button>
             </div>
-        </div>
+        </motion.div>
     );
 };
 
 
-const NFTGallery = ({ nfts, loading, error }) => {
+const NFTGallery = ({ nfts, loading, error, title }) => { // Added 'title' prop here
     const [selectedNft, setSelectedNft] = useState(null);
-    // State for pagination
     const [currentPage, setCurrentPage] = useState(1);
-    const pageSize = 10; // Show 10 NFTs per page
+    const pageSize = 10; 
 
-    // Reset to page 1 if the NFT list changes
     useEffect(() => {
         setCurrentPage(1);
     }, [nfts]);
 
     const handlePurchase = (nft) => {
-        // Placeholder for future on-chain purchase logic
         console.log("Attempting to purchase:", nft);
         alert(`Purchase functionality for "${nft.name}" is not yet implemented.`);
     };
@@ -106,10 +109,10 @@ const NFTGallery = ({ nfts, loading, error }) => {
     }
 
     if (!Array.isArray(nfts) || nfts.length === 0) {
-        return <div className="text-center p-10 bg-gray-800/50 rounded-lg"><p className="text-xl text-gray-400">No NFTs found.</p></div>;
+        // Only show "No NFTs found" if a title is present, otherwise render nothing
+        return title ? <div className="text-center p-10 bg-gray-800/50 rounded-lg"><p className="text-xl text-gray-400">No NFTs found.</p></div> : null;
     }
     
-    // Pagination logic
     const pageCount = Math.ceil(nfts.length / pageSize);
     const startIndex = (currentPage - 1) * pageSize;
     const paginatedNfts = nfts.slice(startIndex, startIndex + pageSize);
@@ -118,14 +121,16 @@ const NFTGallery = ({ nfts, loading, error }) => {
     const goToPreviousPage = () => setCurrentPage((page) => Math.max(page - 1, 1));
 
     return (
-        <>
+        <section className="my-16">
+            {/* THIS IS THE NEW HEADING */}
+            {title && <h2 className="text-3xl font-bold text-center text-white mb-8">{title}</h2>}
+
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                 {paginatedNfts.map((nft, index) => (
                     <NFTCard key={nft.mintAddress || nft.publicKey || index} nft={nft} onSelect={setSelectedNft} />
                 ))}
             </div>
 
-            {/* Pagination Controls */}
             {pageCount > 1 && (
                 <div className="flex justify-center items-center gap-4 mt-8">
                     <button 
@@ -153,7 +158,7 @@ const NFTGallery = ({ nfts, loading, error }) => {
                 onClose={() => setSelectedNft(null)}
                 onPurchase={handlePurchase}
             />
-        </>
+        </section>
     );
 };
 

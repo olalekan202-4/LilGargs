@@ -1,9 +1,8 @@
 // src/App.jsx
-
 import { Buffer } from 'buffer';
 window.Buffer = Buffer;
 
-import { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useWallet, WalletProvider, ConnectionProvider } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { Connection } from "@solana/web3.js";
@@ -36,7 +35,7 @@ function App() {
   const [messageType, setMessageType] = useState('info');
 
   const {
-    launchpadInfo: rawLaunchpadInfo, // Rename raw data
+    launchpadInfo: rawLaunchpadInfo,
     collectionNfts,
     ownedNfts,
     loading,
@@ -51,18 +50,16 @@ function App() {
 
   const connection = useMemo(() => new Connection("https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY_HERE"), []);
 
-  // --- NEW: LOGIC TO TRANSFORM API DATA ---
   const launchpadInfo = useMemo(() => {
     if (!rawLaunchpadInfo || !rawLaunchpadInfo.data) {
       return null;
     }
 
     const { data } = rawLaunchpadInfo;
-    const now = Date.now() / 1000; // Current time in seconds
+    const now = Date.now() / 1000;
 
     const phases = [];
 
-    // Process VIP Phase
     if (data.isVipPhaseAdded) {
       let status = "Upcoming";
       if (now >= data.vipPhaseStart && (now < data.vipPhaseEnd || data.vipPhaseEnd === 0)) status = "Live";
@@ -76,7 +73,6 @@ function App() {
       });
     }
 
-    // Process Public Phase
     if (data.isPublicPhaseAdded) {
       let status = "Upcoming";
       if (now >= data.publicPhaseStart && (now < data.publicPhaseEnd || data.publicPhaseEnd === 0)) status = "Live";
@@ -85,21 +81,17 @@ function App() {
         name: "Public",
         group: "pb",
         price: `${data.publicPhaseAmount} SOL`,
-        limit: "UNLIMITED per Wallet", // Or use publicMaxMintLimit if needed
+        limit: "UNLIMITED per Wallet",
         status: status,
       });
     }
     
-    // Add other phases (OG, WL) here if needed, following the same pattern
-
-    // Return the original data structure but with our formatted phases array
     return {
       ...data,
       phases,
     };
 
   }, [rawLaunchpadInfo]);
-  // --- END OF NEW LOGIC ---
 
   useEffect(() => {
     let interval;
@@ -190,7 +182,7 @@ function App() {
                 nfts={ownedNfts}
                 loading={loading}
                 error={error ? "Failed to load your NFTs." : null}
-                title="Your Mining Gargs"
+                title="NFTs Minted" // THIS LINE IS UPDATED
             />
           </>
         ) : (
@@ -213,7 +205,7 @@ function App() {
             nfts={collectionNfts}
             loading={loading}
             error={error ? "Failed to load collection NFTs." : null}
-            title="Lil Gargs OGs Collection Preview"
+            title="Lil Gargs OGs Minted NFTs"
           />
 
       </main>
