@@ -6,9 +6,9 @@ import Logo from '../assets/log.jpg'
 
 const PulsingCrystal = () => (
     <div className="relative w-32 h-32 mx-auto my-4">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-cyan-400 rounded-full opacity-80 blur-lg animate-pulse"></div>
+        <div className="absolute"></div>
         <div 
-            className="absolute h-[20px] w-[20px]"
+            className="absolute h-[150px] w-[150px]"
         ><img src={Logo} alt="Logo" /></div>
     </div>
 );
