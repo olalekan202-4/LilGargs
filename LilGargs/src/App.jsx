@@ -1,5 +1,9 @@
 // src/App.jsx
-import React, { useState, useMemo, useEffect } from "react";
+
+import { Buffer } from 'buffer';
+window.Buffer = Buffer;
+
+import { useState, useMemo, useEffect } from "react";
 import { useWallet, WalletProvider, ConnectionProvider } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { Connection } from "@solana/web3.js";
