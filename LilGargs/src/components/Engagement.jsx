@@ -35,7 +35,7 @@ const Engagement = ({ unclaimedGarg, ogCount }) => {
                 <motion.a
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    href="YOUR_DISCORD_LINK_HERE" // Replace with your Discord invite
+                    href="https://discord.gg/HzsdJ8fd6M"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-8 py-3 bg-purple-700 text-white font-bold rounded-xl shadow-lg hover:bg-purple-800 transition-colors"
