@@ -13,7 +13,7 @@ const PulsingCrystal = () => (
     </div>
 );
 
-const MiningHub = ({ ownedNfts, unclaimedGarg, totalMiningRate, onDailyClaim }) => {
+const MiningHub = ({ ownedNfts, unclaimedGarg, totalMiningRate, onDailyClaim, activeBoost }) => {
     const [canClaim, setCanClaim] = useState(false);
     const ogCount = Array.isArray(ownedNfts) ? ownedNfts.length : 0;
 
@@ -68,6 +68,14 @@ const MiningHub = ({ ownedNfts, unclaimedGarg, totalMiningRate, onDailyClaim }) 
             <div className="flex flex-col justify-around items-center gap-4 z-10 relative h-full">
                 <PulsingCrystal />
                 <div className="text-center bg-gray-900/50 p-6 rounded-xl border border-purple-500/50 shadow-lg w-full">
+                    {activeBoost && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                          className="text-sm font-bold text-yellow-400 mb-2"
+                        >
+                          🚀 2x Mining Boost Active!
+                        </motion.div>
+                    )}
                     <p className="text-xl text-gray-300 mb-2">Unclaimed $GARG</p>
                     <p className="text-5xl font-mono font-bold text-emerald-400 tracking-wider">
                         <AnimatedCounter from={unclaimedGarg - totalMiningRate} to={unclaimedGarg} />

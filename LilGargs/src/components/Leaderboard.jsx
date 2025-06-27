@@ -10,7 +10,7 @@ const topMiners = [
   { rank: 4, wallet: "zK...L2e", ogs: 35, mined: "812.99 $GARG" },
   { rank: 5, wallet: "Gargantuan.eth", ogs: 31, mined: "745.01 $GARG" },
   {
-    rank: 5,
+    rank: 6,
     wallet: "4fNqdQRDnKEpVvxvozNftiS67AHM2wLvKLNvaHkeuAWB",
     ogs: 25,
     mined: "650.00 $GARG",
@@ -31,7 +31,7 @@ const GlobalStats = () => (
   </motion.div>
 );
 
-const Leaderboard = ({ userWalletAddress }) => {
+const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
@@ -56,6 +56,7 @@ const Leaderboard = ({ userWalletAddress }) => {
           <tbody>
             {topMiners.map((miner, index) => {
               const isUser = miner.wallet === userWalletAddress;
+              const hasFlair = purchasedFlairs[miner.wallet];
 
               return (
                 <motion.tr
@@ -72,6 +73,7 @@ const Leaderboard = ({ userWalletAddress }) => {
                 >
                   <td className="p-3 font-bold text-lg">{miner.rank}</td>
                   <td className="p-3 font-mono flex items-center gap-2">
+                    {hasFlair && <span title="Leaderboard Flair">⭐</span>}
                     {miner.wallet}
                     {isUser && (
                       <span className="text-xs font-bold bg-purple-600 px-2 py-1 rounded-full">

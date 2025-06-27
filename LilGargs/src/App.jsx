@@ -11,7 +11,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import { motion } from 'framer-motion';
 
 // --- Core Components ---
-import Hero from './components/Hero'; // Import the new component
+import Hero from './components/Hero';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import MessageDisplay from './components/MessageDisplay';
@@ -23,6 +23,7 @@ import Leaderboard from "./components/Leaderboard";
 import ComingSoon from "./components/ComingSoon";
 import TierProgress from "./components/TierProgress";
 import Engagement from "./components/Engagement";
+import GargShop from './components/GargShop'; // Import the new component
 import { useGensuki } from './hooks/useGensuki';
 
 
@@ -44,9 +45,15 @@ function App() {
     refresh
   } = useGensuki(wallet.publicKey?.toBase58());
 
+  // --- State for Mining & Shop ---
   const [unclaimedGarg, setUnclaimedGarg] = useState(0);
+  const [activeBoost, setActiveBoost] = useState(null);
+  const [purchasedFlairs, setPurchasedFlairs] = useState({});
+
   const ogCount = Array.isArray(ownedNfts) ? ownedNfts.length : 0;
-  const totalMiningRate = ogCount * MINING_RATE_PER_NFT;
+  const baseMiningRate = ogCount * MINING_RATE_PER_NFT;
+  const boostMultiplier = activeBoost ? activeBoost.multiplier : 1;
+  const totalMiningRate = baseMiningRate * boostMultiplier;
 
   const connection = useMemo(() => new Connection("https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY_HERE"), []);
 
@@ -101,6 +108,40 @@ function App() {
     setTimeout(() => setMessage(''), 5000);
   };
 
+  const handlePurchase = (itemId, price) => {
+    if (unclaimedGarg < price) {
+      showMessage("You do not have enough $GARG to purchase this item.", "error");
+      return;
+    }
+
+    setUnclaimedGarg(prev => prev - price);
+
+    if (itemId === 'boost') {
+      if (activeBoost) {
+        showMessage("You already have an active mining boost.", "info");
+        return;
+      }
+      const expiry = Date.now() + 24 * 60 * 60 * 1000;
+      setActiveBoost({ multiplier: 2, expiry });
+      showMessage("2x Mining Boost activated for 24 hours!", "success");
+
+      setTimeout(() => {
+        setActiveBoost(null);
+        showMessage("Your mining boost has expired.", "info");
+      }, 24 * 60 * 60 * 1000);
+    }
+
+    if (itemId === 'flair') {
+      setPurchasedFlairs(prev => ({ ...prev, [wallet.publicKey.toBase58()]: true }));
+      showMessage("Leaderboard Flair purchased! You're a legend.", "success");
+    }
+
+    if (itemId === 'raffle') {
+      console.log(`User ${wallet.publicKey.toBase58()} purchased a raffle ticket.`);
+      showMessage("Raffle ticket purchased! Good luck.", "success");
+    }
+  };
+
   const livePhase = useMemo(() => launchpadInfo?.phases?.find(p => p.status === 'Live'), [launchpadInfo]);
   const mintedCount = collectionNfts?.length || 0;
   const totalSupply = launchpadInfo?.supply || 0;
@@ -126,7 +167,7 @@ function App() {
                       </motion.div>
                     )}
                     <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="h-full">
-                        <MiningHub ownedNfts={ownedNfts} unclaimedGarg={unclaimedGarg} totalMiningRate={totalMiningRate} onDailyClaim={handleDailyClaim} />
+                        <MiningHub ownedNfts={ownedNfts} unclaimedGarg={unclaimedGarg} totalMiningRate={totalMiningRate} onDailyClaim={handleDailyClaim} activeBoost={activeBoost} />
                     </motion.div>
                 </div>
                 <TierProgress ownedNfts={ownedNfts} />
@@ -139,11 +180,16 @@ function App() {
                 </motion.div>
             )}
         </div>
+        
+        <GargShop userGargBalance={unclaimedGarg} onPurchase={handlePurchase} activeBoost={activeBoost} />
+        
         <div id="leaderboard" ref={sectionRefs['leaderboard']}>
-            <Leaderboard userWalletAddress={wallet.publicKey?.toBase58()} />
+            <Leaderboard userWalletAddress={wallet.publicKey?.toBase58()} purchasedFlairs={purchasedFlairs} />
         </div>
+        
         <ComingSoon />
         <Engagement unclaimedGarg={unclaimedGarg} ogCount={ogCount} totalMiningRate={totalMiningRate} />
+        
         <div id="collection" ref={sectionRefs['collection']}>
             <NFTGallery nfts={collectionNfts} loading={loading} error={error ? "Failed to load collection NFTs." : null} title="Lil Gargs OGs Collection Preview" />
         </div>
