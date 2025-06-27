@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// src/components/NFTGallery.jsx
+import React, { useState, useEffect } from 'react';
 
 const NFTDetailModal = ({ nft, onClose, onPurchase }) => {
     if (!nft) return null;
@@ -75,6 +76,14 @@ const NFTCard = ({ nft, onSelect }) => {
 
 const NFTGallery = ({ nfts, loading, error }) => {
     const [selectedNft, setSelectedNft] = useState(null);
+    // State for pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 10; // Show 10 NFTs per page
+
+    // Reset to page 1 if the NFT list changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [nfts]);
 
     const handlePurchase = (nft) => {
         // Placeholder for future on-chain purchase logic
@@ -85,7 +94,7 @@ const NFTGallery = ({ nfts, loading, error }) => {
     if (loading) {
         return (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {[...Array(10)].map((_, i) => (
+                {[...Array(pageSize)].map((_, i) => (
                     <div key={i} className="bg-gray-800 rounded-xl h-96 animate-pulse"></div>
                 ))}
             </div>
@@ -99,14 +108,45 @@ const NFTGallery = ({ nfts, loading, error }) => {
     if (!Array.isArray(nfts) || nfts.length === 0) {
         return <div className="text-center p-10 bg-gray-800/50 rounded-lg"><p className="text-xl text-gray-400">No NFTs found.</p></div>;
     }
+    
+    // Pagination logic
+    const pageCount = Math.ceil(nfts.length / pageSize);
+    const startIndex = (currentPage - 1) * pageSize;
+    const paginatedNfts = nfts.slice(startIndex, startIndex + pageSize);
+
+    const goToNextPage = () => setCurrentPage((page) => Math.min(page + 1, pageCount));
+    const goToPreviousPage = () => setCurrentPage((page) => Math.max(page - 1, 1));
 
     return (
         <>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-                {nfts.map((nft, index) => (
+                {paginatedNfts.map((nft, index) => (
                     <NFTCard key={nft.mintAddress || nft.publicKey || index} nft={nft} onSelect={setSelectedNft} />
                 ))}
             </div>
+
+            {/* Pagination Controls */}
+            {pageCount > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-8">
+                    <button 
+                        onClick={goToPreviousPage} 
+                        disabled={currentPage === 1}
+                        className="px-6 py-2 bg-gray-700 text-white font-bold rounded-lg hover:bg-gray-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Previous
+                    </button>
+                    <span className="text-white font-semibold">
+                        Page {currentPage} of {pageCount}
+                    </span>
+                    <button 
+                        onClick={goToNextPage} 
+                        disabled={currentPage === pageCount}
+                        className="px-6 py-2 bg-gray-700 text-white font-bold rounded-lg hover:bg-gray-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
 
             <NFTDetailModal 
                 nft={selectedNft} 
