@@ -66,7 +66,6 @@ export const fetchCollectionAssets = async () => {
       const data = await response.json();
       console.log("Raw response from /api/assets:", data); // For debugging
       
-      // FIX: The console log shows the array is in the 'nfts' property.
       return data.nfts || [];
 
     } catch (error) {
@@ -100,10 +99,11 @@ export const fetchUserAssets = async (userAddress) => {
         throw new Error(`Error fetching user assets: ${response.status} ${response.statusText} - ${errorText}`);
     }
      const data = await response.json();
-     console.log("Raw response from /api/wallets:", data); // For debugging
+     console.log("Raw response from /api/wallets:", data);
 
-    // FIX: Assuming the wallets API also uses the 'nfts' property for consistency.
-    return data.nfts || [];
+    // --- THIS IS THE CORRECTED LINE ---
+    // The API response sends the NFT array in the 'tokens' property.
+    return data.tokens || [];
 
   } catch (error) {
     console.error("Failed to fetch user assets:", error);
