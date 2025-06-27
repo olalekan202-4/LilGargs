@@ -1,4 +1,6 @@
+// src/components/Leaderboard.jsx
 import React from 'react';
+import { motion } from 'framer-motion';
 
 // Placeholder data for the leaderboard
 const topMiners = [
@@ -10,22 +12,32 @@ const topMiners = [
 ];
 
 const GlobalStats = () => (
-    <div className="text-center mb-8">
+    <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+        className="text-center mb-8"
+    >
         <h3 className="text-2xl font-bold text-cyan-300">
             🌐 Total $GARG Mined: <span className="font-mono">1,234,567.890</span>
         </h3>
         <p className="text-sm text-gray-500">(Live data coming soon)</p>
-    </div>
+    </motion.div>
 );
 
 
 const Leaderboard = () => {
     return (
-         <section className="container mx-auto p-6 my-12 bg-gray-800/50 rounded-2xl shadow-2xl backdrop-blur-md border border-gray-700">
+         <motion.section 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="container mx-auto p-6 my-12 bg-gray-800/50 rounded-2xl shadow-2xl backdrop-blur-md border border-gray-700"
+        >
             <h2 className="text-3xl font-bold text-center text-emerald-300 mb-6">Top Miners Leaderboard</h2>
             <GlobalStats />
             <div className="overflow-x-auto">
-                <table className="w-full text-left">
+                <table className="w-full text-left min-w-[600px]">
                     <thead>
                         <tr className="border-b border-gray-600">
                             <th className="p-3">Rank</th>
@@ -35,19 +47,25 @@ const Leaderboard = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {topMiners.map(miner => (
-                            <tr key={miner.rank} className="border-b border-gray-700 hover:bg-gray-700/50">
+                        {topMiners.map((miner, index) => (
+                            <motion.tr 
+                                key={miner.rank} 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.1 * index }}
+                                className="border-b border-gray-700 hover:bg-gray-700/50"
+                            >
                                 <td className="p-3 font-bold text-lg">{miner.rank}</td>
                                 <td className="p-3 font-mono">{miner.wallet}</td>
                                 <td className="p-3 text-center font-bold text-purple-400">{miner.ogs}</td>
                                 <td className="p-3 text-right font-mono text-emerald-400">{miner.mined}</td>
-                            </tr>
+                            </motion.tr>
                         ))}
                     </tbody>
                 </table>
             </div>
             <p className="text-center text-xs text-gray-500 mt-4">Leaderboard updates every 60 seconds. User highlighting coming soon.</p>
-        </section>
+        </motion.section>
     );
 };
 

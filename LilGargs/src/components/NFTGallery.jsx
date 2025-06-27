@@ -1,5 +1,5 @@
 // src/components/NFTGallery.jsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 const NFTDetailModal = ({ nft, onClose, onPurchase }) => {
     if (!nft) return null;

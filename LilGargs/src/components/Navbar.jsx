@@ -1,18 +1,22 @@
 // src/components/Navbar.jsx
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
-const Navbar = ({ wallet }) => {
-  return (
-    <nav className="bg-gray-800 p-4 shadow-md w-full">
-      <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-indigo-400">Lil Gargs NFT</h1>
-        <div className="flex items-center space-x-4">
-          {/* You can add other navigation links here if needed */}
-          <WalletMultiButton className="!bg-indigo-600 hover:!bg-indigo-700 !text-white !rounded-xl !px-4 !py-2" />
-        </div>
-      </div>
-    </nav>
-  );
+const Navbar = () => {
+    return (
+        <header className="bg-gray-900/50 backdrop-blur-md shadow-lg sticky top-0 z-40 border-b border-gray-700/50">
+            <div className="container mx-auto flex justify-between items-center p-4 text-white">
+                {/* Site Title */}
+                <h1 className="text-2xl font-bold tracking-wider">
+                    Lil Gargs
+                </h1>
+
+                {/* Wallet Connector */}
+                <WalletMultiButton 
+                    className="!bg-purple-600 hover:!bg-purple-700 !transition-all !duration-300" 
+                />
+            </div>
+        </header>
+    );
 };
 
 export default Navbar;

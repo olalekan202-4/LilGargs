@@ -1,23 +1,43 @@
 // src/components/MessageDisplay.jsx
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const MessageDisplay = ({ message, type, onClose }) => {
-  if (!message) return null;
+    const [visible, setVisible] = useState(false);
 
-  const bgColor = type === "success" ? "bg-green-100" : "bg-red-100";
-  const textColor = type === "success" ? "text-green-800" : "text-red-800";
-  const borderColor = type === "success" ? "border-green-400" : "border-red-400";
+    useEffect(() => {
+        if (message) {
+            setVisible(true);
+            const timer = setTimeout(() => {
+                setVisible(false);
+            }, 4500); // Hide just before the 5s timeout in App.jsx
+            return () => clearTimeout(timer);
+        } else {
+            setVisible(false);
+        }
+    }, [message, type]);
 
-  return (
-    <div
-      className={`fixed top-4 left-1/2 -translate-x-1/2 p-4 rounded-xl shadow-lg flex items-center justify-between z-50 ${bgColor} ${textColor} border ${borderColor}`}
-      role="alert"
-    >
-      <span className="block sm:inline">{message}</span>
-      <button onClick={onClose} className="ml-4 font-bold text-lg leading-none cursor-pointer">
-        &times;
-      </button>
-    </div>
-  );
+    const bgColor = {
+        info: 'bg-blue-500',
+        success: 'bg-emerald-500',
+        error: 'bg-red-500',
+    }[type];
+
+    return (
+        <AnimatePresence>
+            {visible && (
+                <motion.div
+                    initial={{ y: -100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -100, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 100, damping: 15 }}
+                    className={`fixed top-5 left-1/2 -translate-x-1/2 z-50 p-4 rounded-lg shadow-lg text-white font-bold text-center ${bgColor}`}
+                >
+                    {message}
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
 };
 
 export default MessageDisplay;
