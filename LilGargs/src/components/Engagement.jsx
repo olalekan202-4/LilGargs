@@ -9,7 +9,7 @@ const Engagement = ({ unclaimedGarg, ogCount, totalMiningRate }) => {
         const siteUrl = "YOUR_SITE_URL_HERE"; // Replace with your actual site URL
 
         // Updated tweet text to include the mining rate
-        const tweetText = `I'm mining $GARG at a rate of ${totalMiningRate.toFixed(6)}/sec with my ${ogCount} Lil’ Gargs OG(s) and have already earned ${unclaimedGarg.toFixed(4)} $GARG! 💎 Join the cosmic rebellion 👉 ${siteUrl}`;
+        const tweetText = `I'm mining $GARG at a rate of ${totalMiningRate.toFixed(6)}/sec with my ${ogCount} Lil’ Gargs OG(s) and have already earned ${unclaimedGarg.toFixed(4)} $GARG! 💎 Join the cosmic rebellion 👉 ${siteUrl} @lilgargs88`;
         
         const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
         window.open(twitterUrl, '_blank');
