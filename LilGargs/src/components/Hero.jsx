@@ -17,7 +17,7 @@ const letterVariants = {
 
 const Hero = () => {
     const title = "Lil Gargs";
-    const tagline = "Cosmic Guardians Reborn.";
+    const tagline = "Elemental Guardians Reborn.";
 
     return (
         <section className="text-center py-24 md:py-32">

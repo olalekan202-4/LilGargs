@@ -8,7 +8,7 @@ const PulsingCrystal = () => (
     <div className="relative w-32 h-32 mx-auto my-4">
         <div className="absolute"></div>
         <div 
-            className="absolute h-[150px] w-[150px]"
+            className="absolute h-[180px] w-[180px]"
         ><img src={Logo} alt="Logo" /></div>
     </div>
 );
