@@ -32,9 +32,11 @@ const MintDetails = ({ launchpadInfo, collectionNfts, loading, error }) => {
     const mintedCount = Array.isArray(collectionNfts) ? collectionNfts.length : 0;
     const availableSupply = supply ? supply - mintedCount : 'N/A';
 
-    const formatDate = (dateString) => {
-        if (!dateString) return 'TBA';
-        const date = new Date(dateString);
+    // UPDATED FUNCTION TO CORRECTLY HANDLE THE DATE
+    const formatDate = (dateInSeconds) => {
+        if (!dateInSeconds || dateInSeconds === 0) return 'TBA';
+        // Multiply by 1000 to convert seconds to milliseconds
+        const date = new Date(dateInSeconds * 1000);
         return date.toLocaleString([], { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     }
 
