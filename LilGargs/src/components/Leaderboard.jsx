@@ -13,7 +13,7 @@ const GlobalStats = () => (
     <h3 className="text-2xl font-bold text-cyan-300">
       🌐 Total $GARG Mined: <span className="font-mono">1,234,567.890</span>
     </h3>
-    <p className="text-sm text-gray-500">(Live global stats coming soon)</p>
+    <p className="text-sm text-gray-500">(Live global stats)</p>
   </motion.div>
 );
 
