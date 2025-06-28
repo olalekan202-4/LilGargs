@@ -1,5 +1,4 @@
 // src/components/Footer.jsx
-import React from "react";
 
 const TwitterIcon = () => (
   <svg
@@ -48,7 +47,7 @@ const Footer = () => {
 
         <div className="flex justify-center items-center gap-8 my-8">
           <a
-            href="https://discord.gg/HzsdJ8fd6M"
+            href="https://x.com/lilgargs88?s=21"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-purple-400 transition-colors"
@@ -57,13 +56,13 @@ const Footer = () => {
             <TwitterIcon />
           </a>
           <a
-            href="https://x.com/lilgargs88?s=21"
+            href="https://discord.gg/HzsdJ8fd6M"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-purple-400 transition-colors"
             aria-label="Discord"
           >
-            <DiscordIcon />
+            <img src='https://img.icons8.com/?size=100&id=65646&format=png&color=000000' alt="discord" className='h-10 w-10' />
           </a>
         </div>
 
