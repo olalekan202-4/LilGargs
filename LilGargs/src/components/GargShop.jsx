@@ -5,26 +5,26 @@ import { motion } from "framer-motion";
 const shopItems = [
   {
     id: "boost",
-    name: "2x Mining Boost",
+    name: "+5% mining boost for 24hours",
     description: "Double your $GARG mining rate for 24 hours.",
     price: 50,
     emoji: "🚀",
   },
   {
     id: "flair",
-    name: "Leaderboard Flair",
+    name: "Fusion Token",
     description:
-      "Get a special star icon next to your name on the leaderboard. A permanent flex!",
-    price: 150,
-    emoji: "⭐",
+      "Needed for NFT fusion (future utility)",
+    price: 300,
+    emoji: "💥",
   },
   {
     id: "raffle",
-    name: "1/1 Raffle Ticket",
+    name: "Mystery Garg Box",
     description:
-      "One entry into the next raffle for a legendary 1-of-1 Lil Garg.",
-    price: 25,
-    emoji: "🎟️",
+      "Random chance for cosmetic or small mining boost",
+    price: 100,
+    emoji: "📦",
   },
 ];
 

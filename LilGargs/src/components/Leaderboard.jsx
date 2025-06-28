@@ -3,7 +3,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { getLeaderboardData } from '../api';
 
-// UPDATED: This component now accepts the calculated total as a prop
+const MINING_RATE_PER_NFT = 0.0005775;
+
 const GlobalStats = ({ totalMined }) => (
   <motion.div
     initial={{ opacity: 0 }}
@@ -14,7 +15,6 @@ const GlobalStats = ({ totalMined }) => (
     <h3 className="text-2xl font-bold text-cyan-300">
       🌐 Total $GARG Mined: 
       <span className="font-mono ml-2">
-        {/* Display the formatted total passed via props */}
         {totalMined.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
       </span>
     </h3>
@@ -42,11 +42,8 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
       });
   }, []);
 
-  // NEW: Calculate the total amount mined using the fetched data
-  // useMemo ensures this calculation only runs when the leaderboardData changes
   const totalMined = useMemo(() => {
     if (!leaderboardData) return 0;
-    // Use the reduce method to sum up the miningBalance of every user
     return leaderboardData.reduce((sum, miner) => sum + miner.miningBalance, 0);
   }, [leaderboardData]);
 
@@ -60,33 +57,35 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
       <h2 className="text-3xl font-bold text-center text-emerald-300 mb-6">
         Top Miners Leaderboard
       </h2>
-
-      {/* Pass the calculated total as a prop to the GlobalStats component */}
       <GlobalStats totalMined={totalMined} />
-
       <div className="overflow-x-auto">
         <table className="w-full text-left min-w-[600px]">
           <thead>
             <tr className="border-b border-gray-600">
               <th className="p-3">Rank</th>
               <th className="p-3">Wallet</th>
+              {/* --- NEW COLUMN HEADER --- */}
+              <th className="p-3 text-center">OGs Owned</th>
               <th className="p-3 text-right">$GARG Mined</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan="3" className="text-center p-8 text-gray-400">Loading...</td>
+                <td colSpan="4" className="text-center p-8 text-gray-400">Loading...</td>
               </tr>
             ) : error ? (
               <tr>
-                <td colSpan="3" className="text-center p-8 text-red-400">{error}</td>
+                <td colSpan="4" className="text-center p-8 text-red-400">{error}</td>
               </tr>
             ) : (
               leaderboardData.map((miner, index) => {
                 const isUser = miner.walletAddress === userWalletAddress;
                 const hasFlair = purchasedFlairs[miner.walletAddress];
                 const displayAddress = `${miner.walletAddress.substring(0, 4)}...${miner.walletAddress.substring(miner.walletAddress.length - 4)}`;
+                
+                // --- NEW: CALCULATE OG COUNT FROM MINING RATE ---
+                const ogsOwned = Math.round(miner.miningRate / MINING_RATE_PER_NFT);
 
                 return (
                   <motion.tr
@@ -110,6 +109,9 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
                           You
                         </span>
                       )}
+                    </td>
+                    <td className="p-3 text-center font-bold text-purple-400">
+                        {ogsOwned}
                     </td>
                     <td className="p-3 text-right font-mono text-emerald-400">
                       {miner.miningBalance.toFixed(6)}

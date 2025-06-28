@@ -24,8 +24,8 @@ import ComingSoon from "./components/ComingSoon";
 import TierProgress from "./components/TierProgress";
 import Engagement from "./components/Engagement";
 import GargShop from './components/GargShop';
-import { useGensuki } from "./hooks/useGensuki"; // Kept for minting/NFT data
-import { getMiningData, updateMiningData } from './api'; // Import new API functions
+import { useGensuki } from "./hooks/useGensuki";
+import { getMiningData, updateMiningData } from './api';
 
 const network = "https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY_HERE";
 const MINING_RATE_PER_NFT = 0.0005775;
@@ -39,13 +39,13 @@ function App() {
   const [messageType, setMessageType] = useState('info');
   const [activeSection, setActiveSection] = useState('mint-hub');
 
-  // --- NFT & Minting Data State (from Gensuki) ---
+  // --- Data from Gensuki API (for NFTs and Minting) ---
   const {
     launchpadInfo: rawLaunchpadInfo,
     collectionNfts,
     ownedNfts,
-    loading,
-    error,
+    loading: nftsLoading,
+    error: nftsError,
     refresh
   } = useGensuki(publicKey?.toBase58());
 
@@ -55,14 +55,14 @@ function App() {
   const [activeBoost, setActiveBoost] = useState(null);
   const [purchasedFlairs, setPurchasedFlairs] = useState({});
 
-  // --- Derived State ---
+  // --- Derived State (Now driven by actual NFT count) ---
   const ogCount = Array.isArray(ownedNfts) ? ownedNfts.length : 0;
   const baseMiningRate = ogCount * MINING_RATE_PER_NFT;
   const boostMultiplier = activeBoost ? activeBoost.multiplier : 1;
   const totalMiningRate = baseMiningRate * boostMultiplier;
 
   const connection = useMemo(() => new Connection("https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY_HERE"), []);
-  
+
   // --- Logic for Persistent Mining Data ---
   useEffect(() => {
     if (!publicKey) {
@@ -70,13 +70,11 @@ function App() {
       setUnclaimedGarg(0);
       return;
     }
-
     const userAddress = publicKey.toBase58();
     setIsMiningDataLoaded(false);
-
     getMiningData(userAddress)
       .then(data => {
-        if (data) {
+        if (data && data.miningRate > 0) {
           const lastSavedTime = new Date(data.sessionStartTime).getTime();
           const currentTime = Date.now();
           const secondsOffline = Math.max(0, (currentTime - lastSavedTime) / 1000);
@@ -99,9 +97,11 @@ function App() {
   useEffect(() => {
     if (!publicKey || !isMiningDataLoaded) return;
     const saveInterval = setInterval(() => {
-      updateMiningData(publicKey.toBase58(), unclaimedGarg, totalMiningRate)
-        .then(() => console.log("Progress saved!"))
-        .catch(err => console.error("Could not save progress:", err));
+      if (totalMiningRate > 0) {
+        updateMiningData(publicKey.toBase58(), unclaimedGarg, totalMiningRate)
+          .then(() => console.log("Progress saved!"))
+          .catch(err => console.error("Could not save progress:", err));
+      }
     }, 15000);
     return () => clearInterval(saveInterval);
   }, [publicKey, isMiningDataLoaded, unclaimedGarg, totalMiningRate]);
@@ -188,7 +188,7 @@ function App() {
       <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
         <Hero />
         <div id="mint-hub" ref={sectionRefs['mint-hub']}>
-            <MintDetails launchpadInfo={launchpadInfo} loading={loading} error={error} collectionNfts={collectionNfts} />
+            <MintDetails launchpadInfo={launchpadInfo} loading={nftsLoading} error={nftsError} collectionNfts={collectionNfts} />
             {wallet.connected ? (
               <>
                 <div className="grid md:grid-cols-2 gap-12 items-stretch my-12">
@@ -205,7 +205,7 @@ function App() {
                     </motion.div>
                 </div>
                 <TierProgress ownedNfts={ownedNfts} />
-                <NFTGallery nfts={ownedNfts} loading={loading} error={error ? "Failed to load your NFTs." : null} title="NFTs Minted" />
+                <NFTGallery nfts={ownedNfts} loading={nftsLoading} error={nftsError ? "Failed to load your NFTs." : null} title="NFTs Minted" />
               </>
             ) : (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="text-center p-12 bg-gray-800/50 rounded-2xl border border-gray-700 my-16">
@@ -221,7 +221,7 @@ function App() {
         <ComingSoon />
         <Engagement unclaimedGarg={unclaimedGarg} ogCount={ogCount} totalMiningRate={totalMiningRate} />
         <div id="collection" ref={sectionRefs['collection']}>
-            <NFTGallery nfts={collectionNfts} loading={loading} error={error ? "Failed to load collection NFTs." : null} title="Lil Gargs OGs Collection Preview" />
+            <NFTGallery nfts={collectionNfts} loading={nftsLoading} error={nftsError ? "Failed to load collection NFTs." : null} title="Lil Gargs OGs Collection Preview" />
         </div>
       </main>
       <Footer />

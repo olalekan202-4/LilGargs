@@ -26,7 +26,7 @@ const MiningHub = ({
   useEffect(() => {
     const lastClaimTime = localStorage.getItem("lastGargClaim");
     if (lastClaimTime) {
-      const timeDiff = Date.now() - parseInt(lastClaimTime, 10);
+      const timeDiff = Date.now() - parseInt(lastClaimTime, 1);
       const hoursDiff = timeDiff / (1000 * 60 * 60);
       setCanClaim(hoursDiff >= 24);
     } else {
@@ -36,10 +36,10 @@ const MiningHub = ({
 
   const handleDailyClaim = () => {
     if (canClaim) {
-      onDailyClaim(10);
+      onDailyClaim(1);
       localStorage.setItem("lastGargClaim", Date.now().toString());
       setCanClaim(false);
-      alert(`You claimed your daily bonus of 10 $GARG!`);
+      alert(`You claimed your daily bonus of 1 $GARG!`);
     }
   };
 
@@ -124,7 +124,7 @@ const MiningHub = ({
             className="w-full px-8 py-4 bg-emerald-600 text-white font-bold rounded-xl shadow-lg hover:bg-emerald-500 transition-all transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:scale-100 disabled:opacity-50"
           >
             <span>
-              {canClaim ? `Claim Daily 10 $GARG` : "Daily Claim Collected"}
+              {canClaim ? `Claim Daily 1 $GARG` : "Daily Claim Collected"}
             </span>
             {!canClaim && (
               <span className="text-xs font-normal mt-1 block">
