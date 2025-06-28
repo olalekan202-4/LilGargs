@@ -214,7 +214,7 @@ function App() {
                 </motion.div>
             )}
         </div>
-        <GargShop userGargBalance={unclaimedGarg} onPurchase={handlePurchase} activeBoost={activeBoost} />
+        <GargShop />
         <div id="leaderboard" ref={sectionRefs['leaderboard']}>
             <Leaderboard userWalletAddress={publicKey?.toBase58()} purchasedFlairs={purchasedFlairs} />
         </div>
