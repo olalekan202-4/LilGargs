@@ -1,21 +1,7 @@
 // src/components/Leaderboard.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-
-// Placeholder data for the leaderboard
-const topMiners = [
-  { rank: 1, wallet: "GargLord.sol", ogs: 52, mined: "1,203.45 $GARG" },
-  { rank: 2, wallet: "8f...k9s", ogs: 45, mined: "987.12 $GARG" },
-  { rank: 3, wallet: "CosmicRebel.sol", ogs: 38, mined: "854.78 $GARG" },
-  { rank: 4, wallet: "zK...L2e", ogs: 35, mined: "812.99 $GARG" },
-  { rank: 5, wallet: "Gargantuan.eth", ogs: 31, mined: "745.01 $GARG" },
-  {
-    rank: 6,
-    wallet: "4fNqdQRDnKEpVvxvozNftiS67AHM2wLvKLNvaHkeuAWB",
-    ogs: 25,
-    mined: "650.00 $GARG",
-  }, // Example for highlighting
-];
+import { getLeaderboardData } from '../api'; // Import the new API function
 
 const GlobalStats = () => (
   <motion.div
@@ -27,11 +13,30 @@ const GlobalStats = () => (
     <h3 className="text-2xl font-bold text-cyan-300">
       🌐 Total $GARG Mined: <span className="font-mono">1,234,567.890</span>
     </h3>
-    <p className="text-sm text-gray-500">(Live data coming soon)</p>
+    <p className="text-sm text-gray-500">(Live global stats coming soon)</p>
   </motion.div>
 );
 
 const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
+  const [leaderboardData, setLeaderboardData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setIsLoading(true);
+    getLeaderboardData()
+      .then(data => {
+        setLeaderboardData(data);
+      })
+      .catch(err => {
+        console.error("Failed to load leaderboard:", err);
+        setError("Could not load leaderboard data.");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
@@ -49,53 +54,57 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
             <tr className="border-b border-gray-600">
               <th className="p-3">Rank</th>
               <th className="p-3">Wallet</th>
-              <th className="p-3 text-center">OGs Owned</th>
               <th className="p-3 text-right">$GARG Mined</th>
             </tr>
           </thead>
           <tbody>
-            {topMiners.map((miner, index) => {
-              const isUser = miner.wallet === userWalletAddress;
-              const hasFlair = purchasedFlairs[miner.wallet];
+            {isLoading ? (
+              <tr>
+                <td colSpan="3" className="text-center p-8 text-gray-400">Loading...</td>
+              </tr>
+            ) : error ? (
+              <tr>
+                <td colSpan="3" className="text-center p-8 text-red-400">{error}</td>
+              </tr>
+            ) : (
+              leaderboardData.map((miner, index) => {
+                const isUser = miner.walletAddress === userWalletAddress;
+                const hasFlair = purchasedFlairs[miner.walletAddress];
+                const displayAddress = `${miner.walletAddress.substring(0, 4)}...${miner.walletAddress.substring(miner.walletAddress.length - 4)}`;
 
-              return (
-                <motion.tr
-                  layout
-                  key={miner.rank}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 * index }}
-                  className={`border-b border-gray-700 transition-colors duration-300 ${
-                    isUser
-                      ? "bg-purple-900/40 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
-                      : "hover:bg-gray-700/50"
-                  }`}
-                >
-                  <td className="p-3 font-bold text-lg">{miner.rank}</td>
-                  <td className="p-3 font-mono flex items-center gap-2">
-                    {hasFlair && <span title="Leaderboard Flair">⭐</span>}
-                    {miner.wallet}
-                    {isUser && (
-                      <span className="text-xs font-bold bg-purple-600 px-2 py-1 rounded-full">
-                        You
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-3 text-center font-bold text-purple-400">
-                    {miner.ogs}
-                  </td>
-                  <td className="p-3 text-right font-mono text-emerald-400">
-                    {miner.mined}
-                  </td>
-                </motion.tr>
-              );
-            })}
+                return (
+                  <motion.tr
+                    layout
+                    key={miner.walletAddress}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.05 * index }}
+                    className={`border-b border-gray-700 transition-colors duration-300 ${
+                      isUser
+                        ? "bg-purple-900/40 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+                        : "hover:bg-gray-700/50"
+                    }`}
+                  >
+                    <td className="p-3 font-bold text-lg">{miner.rank}</td>
+                    <td className="p-3 font-mono flex items-center gap-2">
+                      {hasFlair && <span title="Leaderboard Flair">⭐</span>}
+                      {displayAddress}
+                      {isUser && (
+                        <span className="text-xs font-bold bg-purple-600 px-2 py-1 rounded-full">
+                          You
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-3 text-right font-mono text-emerald-400">
+                      {miner.miningBalance.toFixed(6)}
+                    </td>
+                  </motion.tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
-      <p className="text-center text-xs text-gray-500 mt-4">
-        Leaderboard updates every 60 seconds. User highlighting coming soon.
-      </p>
     </motion.section>
   );
 };

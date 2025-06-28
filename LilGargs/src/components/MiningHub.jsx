@@ -5,11 +5,10 @@ import AnimatedCounter from "./AnimatedCounter";
 import Logo from "/log.jpg";
 
 const PulsingCrystal = () => (
-  <div className="relative w-32 h-32 mx-auto my-4">
-    <div className="absolute"></div>
-    <div className="absolute h-[180px] w-[180px]">
-      <img src={Logo} alt="Logo" />
-    </div>
+  <div className="relative w-32 h-32 mx-auto my-4 flex items-center justify-center">
+    {/* Optional: Add a glowing ring behind the logo */}
+    <div className="absolute w-full h-full bg-purple-500 rounded-full animate-pulse blur-xl opacity-50"></div>
+    <img src={Logo} alt="Lil Gargs Logo" className="relative h-[120px] w-[120px] rounded-full" />
   </div>
 );
 
@@ -19,6 +18,7 @@ const MiningHub = ({
   totalMiningRate,
   onDailyClaim,
   activeBoost,
+  isDataLoaded,
 }) => {
   const [canClaim, setCanClaim] = useState(false);
   const ogCount = Array.isArray(ownedNfts) ? ownedNfts.length : 0;
@@ -43,13 +43,25 @@ const MiningHub = ({
     }
   };
 
+  if (!isDataLoaded) {
+    return (
+        <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="text-center p-8 my-12 bg-gray-800/50 rounded-3xl shadow-2xl flex items-center justify-center min-h-[450px]"
+        >
+            <div className="w-8 h-8 border-2 border-t-purple-500 border-gray-600 rounded-full animate-spin"></div>
+            <p className="ml-4 text-gray-400">Loading Your Mining Data...</p>
+        </motion.div>
+    );
+  }
+
   if (ogCount === 0) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="text-center p-8 bg-gray-800/50 rounded-2xl border border-gray-700 h-full flex flex-col justify-center"
+        className="text-center p-8 bg-gray-800/50 rounded-2xl border border-gray-700 h-full flex flex-col justify-center min-h-[450px]"
       >
         <h3 className="text-2xl font-bold text-white">
           The Gargoyle Mines Await
@@ -79,7 +91,6 @@ const MiningHub = ({
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         className="absolute inset-0 border-2 rounded-3xl pointer-events-none"
       />
-
       <h2 className="text-3xl font-bold text-center text-purple-300 mb-2">
         Gargoyle Mining Hub
       </h2>
