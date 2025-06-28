@@ -1,9 +1,10 @@
 // src/components/Leaderboard.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { getLeaderboardData } from '../api'; // Import the new API function
+import { getLeaderboardData } from '../api';
 
-const GlobalStats = () => (
+// UPDATED: This component now accepts the calculated total as a prop
+const GlobalStats = ({ totalMined }) => (
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -11,9 +12,13 @@ const GlobalStats = () => (
     className="text-center mb-8"
   >
     <h3 className="text-2xl font-bold text-cyan-300">
-      🌐 Total $GARG Mined: <span className="font-mono">1,234,567.890</span>
+      🌐 Total $GARG Mined: 
+      <span className="font-mono ml-2">
+        {/* Display the formatted total passed via props */}
+        {totalMined.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
+      </span>
     </h3>
-    <p className="text-sm text-gray-500">(Live global stats)</p>
+    <p className="text-sm text-gray-500">(Live global stats from leaderboard)</p>
   </motion.div>
 );
 
@@ -37,6 +42,14 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
       });
   }, []);
 
+  // NEW: Calculate the total amount mined using the fetched data
+  // useMemo ensures this calculation only runs when the leaderboardData changes
+  const totalMined = useMemo(() => {
+    if (!leaderboardData) return 0;
+    // Use the reduce method to sum up the miningBalance of every user
+    return leaderboardData.reduce((sum, miner) => sum + miner.miningBalance, 0);
+  }, [leaderboardData]);
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
@@ -47,7 +60,10 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
       <h2 className="text-3xl font-bold text-center text-emerald-300 mb-6">
         Top Miners Leaderboard
       </h2>
-      <GlobalStats />
+
+      {/* Pass the calculated total as a prop to the GlobalStats component */}
+      <GlobalStats totalMined={totalMined} />
+
       <div className="overflow-x-auto">
         <table className="w-full text-left min-w-[600px]">
           <thead>
