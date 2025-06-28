@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { motion, AnimatePresence } from 'framer-motion';
+import Logo from "/log.jpg";
 
 // A new, enhanced NavLink component
 const NavLink = ({ href, children, isActive, onClick }) => (
@@ -47,7 +48,8 @@ const Navbar = ({ activeSection }) => {
                 <div className="container mx-auto flex justify-between items-center p-4 text-white">
                     {/* Left side: Title and Desktop Nav */}
                     <div className="flex items-center gap-8">
-                        <h1 className="text-2xl font-bold tracking-wider">Lil Gargs</h1>
+                        <img src={Logo } alt="logo" className='h-20 w-20' />
+                        <h1 className="text-2xl font-bold tracking-wider hidden md:block">Lil Gargs</h1>
                         <nav className="hidden md:flex gap-8">
                             {navItems.map(item => (
                                 <NavLink key={item.href} href={item.href} isActive={activeSection === item.href.substring(1)}>

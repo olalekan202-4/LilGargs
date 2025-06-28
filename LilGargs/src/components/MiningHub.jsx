@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import AnimatedCounter from "./AnimatedCounter";
-import Logo from "../assets/log.jpg";
+import Logo from "/log.jpg";
 
 const PulsingCrystal = () => (
   <div className="relative w-32 h-32 mx-auto my-4">
