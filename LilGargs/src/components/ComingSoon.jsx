@@ -43,9 +43,9 @@ const ComingSoon = () => {
     return (
         <>
             <TeaserModal content={modalContent} onClose={() => setModalContent(null)} />
-            <section className="container mx-auto p-6 my-12">
+            <section className="container md:mx-auto my-12">
                 <h2 className="text-3xl font-bold text-center text-gray-400 mb-8">Future of the Gargiverse</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-6">
                     {features.map(feature => (
                         <motion.div 
                             key={feature.name} 
@@ -54,8 +54,8 @@ const ComingSoon = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                         >
-                            <h3 className="text-xl font-bold text-white mb-2">{feature.name}</h3>
-                            <p className="text-purple-400 font-semibold">{feature.status}</p>
+                            <h3 className="text-sm md:text-xl font-bold text-white mb-2">{feature.name}</h3>
+                            <p className="text-purple-400 text-sm md:text-base font-semibold">{feature.status}</p>
                         </motion.div>
                     ))}
                 </div>

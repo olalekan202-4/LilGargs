@@ -28,11 +28,11 @@ const GargShop = () => {
             <LockIcon />
         </motion.div>
         
-        <h2 className="text-4xl font-bold text-center text-cyan-300 mb-4 tracking-tight">
+        <h2 className="text-xl md:text-4xl font-bold text-center text-cyan-300 mb-4 tracking-tight">
           The GargShop Awakens Soon
         </h2>
         
-        <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-8">
+        <p className="text-sm md:text-lg text-gray-400 max-w-2xl mx-auto mb-8">
           The forge is being prepared. Soon you will be able to spend your <span className="font-bold text-cyan-400">$GARG</span> on powerful boosts, legendary artifacts, and raffle tickets for one-of-a-kind treasures.
         </p>
 
