@@ -16,7 +16,7 @@ export const getMiningData = async (walletAddress) => {
 
 export const updateMiningData = async (walletAddress, miningBalance, miningRate) => {
     try {
-        const response = await fetch(`${PERSISTENT_API_URL}/api/mining`, {
+        const response = await fetch(`${PERSISTENT_API_URL}/api/mining/start`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ walletAddress, miningBalance, miningRate }),
