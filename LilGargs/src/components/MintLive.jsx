@@ -5,55 +5,75 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { VersionedTransaction } from '@solana/web3.js';
 import { getMintTransaction } from '../api';
 
+// A custom hook for the animated counter, adapted for currency
 function useAnimatedCounter(toValue) {
     const nodeRef = useRef(null);
     const fromValue = useRef(0);
+
     useEffect(() => {
         const node = nodeRef.current;
         const controls = animate(fromValue.current, toValue, {
             duration: 0.5,
             ease: "easeOut",
-            onUpdate(value) { if (node) node.textContent = value.toFixed(2); },
+            onUpdate(value) {
+                if (node) {
+                    node.textContent = value.toFixed(2); // Format to 2 decimal places for SOL
+                }
+            },
         });
         fromValue.current = toValue;
         return () => controls.stop();
     }, [toValue]);
+
     return <span ref={nodeRef} />;
 }
 
+
 const MintLive = ({ livePhase, mintedCount, totalSupply, showMessage, refresh, connection }) => {
-    const { publicKey, signTransaction } = useWallet();
+    // UPDATED: Get signAndSendTransaction from the useWallet hook
+    const { publicKey, signAndSendTransaction } = useWallet();
     const [mintCount, setMintCount] = useState(1);
     const [isMinting, setIsMinting] = useState(false);
 
     const handleMint = async () => {
-        if (!publicKey || !signTransaction) {
+        if (!publicKey || !signAndSendTransaction) {
             showMessage("Please connect your wallet to mint.", "error");
             return;
         }
+
         setIsMinting(true);
         showMessage(`Preparing to mint ${mintCount} NFT(s)...`, 'info');
+
         try {
+            // 1. Get the unsigned transaction from your backend
             const { mintTx } = await getMintTransaction(publicKey.toBase58(), mintCount, livePhase.group);
-            if (!mintTx) throw new Error("Did not receive a valid transaction.");
+            if (!mintTx) throw new Error("Did not receive a valid transaction from the server.");
+            
             showMessage("Transaction received, please sign...", "info");
+
             const txBuffer = Buffer.from(mintTx, "base64");
             const versionedTx = VersionedTransaction.deserialize(txBuffer);
-            const signedTx = await signTransaction(versionedTx);
-            showMessage("Simulating transaction...", "info");
-            const { value: simulationResult } = await connection.simulateTransaction(signedTx, { commitment: "confirmed" });
-            if (simulationResult.err) {
-                console.error("Simulation Error:", simulationResult.logs);
-                throw new Error("Transaction simulation failed.");
-            }
-            showMessage("Sending transaction...", "info");
-            const txid = await connection.sendRawTransaction(signedTx.serialize());
-            await connection.confirmTransaction(txid, "confirmed");
-            showMessage(`Mint successful! Transaction: ${txid.substring(0, 10)}...`, "success");
+
+            // 2. UPDATED: Use signAndSendTransaction to let the wallet sign and send
+            // This single method replaces the separate signTransaction and sendRawTransaction calls.
+            const signature = await signAndSendTransaction(versionedTx);
+            
+            // 3. Confirm the transaction using the returned signature
+            showMessage("Confirming transaction...", "info");
+            await connection.confirmTransaction(signature, "confirmed");
+
+            showMessage(`Mint successful! Transaction: ${signature.substring(0, 10)}...`, "success");
+            
             if(refresh) refresh();
+
         } catch (error) {
             console.error("Minting failed:", error);
-            showMessage(error.message || "An unknown error occurred.", "error");
+            // Handle specific case where user rejects the transaction
+            if (error.name === 'WalletSendTransactionError' || error.message.includes('User rejected the request')) {
+                showMessage("Transaction rejected.", "error");
+            } else {
+                showMessage(error.message || "An unknown error occurred during mint.", "error");
+            }
         } finally {
             setIsMinting(false);
         }
@@ -61,11 +81,15 @@ const MintLive = ({ livePhase, mintedCount, totalSupply, showMessage, refresh, c
 
     const progress = totalSupply > 0 ? (mintedCount / totalSupply) * 100 : 0;
     const pricePerNFT = parseFloat(livePhase.price);
-    const totalCost = mintCount * pricePerNFT;
-    const animatedTotalCost = useAnimatedCounter(totalCost);
+    const totalCost = (mintCount * pricePerNFT).toFixed(2);
 
     return (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="p-6 bg-gray-800/50 rounded-2xl border border-gray-700 h-full flex flex-col justify-center shadow-lg">
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="p-6 bg-gray-800/50 rounded-2xl border border-gray-700 h-full flex flex-col justify-center shadow-lg"
+        >
             <div className="flex justify-between items-center mb-4">
                 <span className="text-green-400 font-bold flex items-center gap-2">
                     <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
@@ -89,9 +113,11 @@ const MintLive = ({ livePhase, mintedCount, totalSupply, showMessage, refresh, c
                     <button onClick={() => setMintCount(p => p + 1)} disabled={isMinting} className="px-4 py-2 bg-gray-700 rounded-lg text-xl font-bold hover:bg-gray-600 transition disabled:opacity-50">+</button>
                 </div>
             </div>
+
             <div className="text-center text-sm text-gray-400 -mt-4 mb-6">
-                Total: <span className="font-bold text-white">{animatedTotalCost} SOL</span> <span className="text-gray-500">(+ fee)</span>
+                Total: <span className="font-bold text-white">{totalCost} SOL</span> <span className="text-gray-500">(+ fee)</span>
             </div>
+            
             <motion.button
                 whileHover={{ scale: 1.05, boxShadow: "0px 0px 20px rgba(168, 85, 247, 0.7)" }}
                 whileTap={{ scale: 0.95 }}

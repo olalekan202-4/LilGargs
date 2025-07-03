@@ -1,8 +1,8 @@
 // src/components/NFTGallery.jsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-const NFTDetailModal = ({ nft, onClose, onPurchase }) => {
+const NFTDetailModal = ({ nft, onClose }) => {
     if (!nft) return null;
 
     const imageUrl = nft.image || nft.imageUrl || "https://placehold.co/500x500/312e81/ffffff?text=No+Image";
@@ -15,7 +15,10 @@ const NFTDetailModal = ({ nft, onClose, onPurchase }) => {
                 </div>
                 <div className="w-full md:w-1/2 p-4 flex flex-col overflow-y-auto">
                     <h2 className="text-3xl font-bold text-white mb-4">{nft.name || 'Unnamed NFT'}</h2>
-                    <p className="text-gray-300 mb-6">{nft.description || "No description available."}</p>
+                    
+                    {nft.description && (
+                        <p className="text-gray-300 mb-6">{nft.description}</p>
+                    )}
                     
                     <h3 className="text-xl font-semibold text-purple-400 mb-2">Attributes</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">
@@ -31,13 +34,17 @@ const NFTDetailModal = ({ nft, onClose, onPurchase }) => {
                         <button onClick={onClose} className="w-full px-6 py-3 bg-gray-600 text-white font-bold rounded-xl hover:bg-gray-500 transition">
                             Close
                         </button>
-                        <button 
-                            onClick={() => onPurchase(nft)} 
-                            className="w-full px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg hover:bg-emerald-500 transition disabled:bg-gray-500 disabled:cursor-not-allowed"
-                            disabled
+                        
+                        {/* --- UPDATED PURCHASE BUTTON --- */}
+                        {/* This is now a link that opens Magic Eden in a new tab */}
+                        <a 
+                            href="https://magiceden.io/marketplace/lil_gargs_ogs"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full px-6 py-3 bg-emerald-600 text-white text-center font-bold rounded-xl shadow-lg hover:bg-emerald-500 transition"
                         >
-                            Purchase
-                        </button>
+                            Purchase on Magic Eden
+                        </a>
                     </div>
                 </div>
                 <button onClick={onClose} className="absolute top-4 right-4 text-white text-2xl hover:text-gray-400">&times;</button>
@@ -51,15 +58,12 @@ const NFTCard = ({ nft, onSelect }) => {
     const imageUrl = nft.image || nft.imageUrl || "https://placehold.co/300x300/312e81/ffffff?text=No+Image";
     const primaryAttribute = nft.attributes && nft.attributes.length > 0 ? nft.attributes[0] : null;
 
-    // --- NEW LOGIC TO FORMAT THE NFT NAME ---
     const formatDisplayName = (name) => {
         if (!name) return 'Unnamed NFT';
-        // Check for the specific prefix and remove it
         if (name.includes('Lil Gargs OGs-legacy')) {
             const number = name.replace('Lil Gargs OGs-legacy', '').trim();
-            return `${number}`;
+            return `#${number}`;
         }
-        // If the prefix isn't there, return the original name
         return name;
     };
 
@@ -82,7 +86,6 @@ const NFTCard = ({ nft, onSelect }) => {
                     />
                 </div>
                 <div className="p-4 flex flex-col flex-grow">
-                    {/* Use the new displayName variable here */}
                     <h3 className="text-lg font-bold text-white truncate">{displayName}</h3>
                     
                     {primaryAttribute ? (
@@ -115,11 +118,6 @@ const NFTGallery = ({ nfts, loading, error, title }) => {
     useEffect(() => {
         setCurrentPage(1);
     }, [nfts]);
-
-    const handlePurchase = (nft) => {
-        console.log("Attempting to purchase:", nft);
-        alert(`Purchase functionality for "${nft.name}" is not yet implemented.`);
-    };
 
     if (loading) {
         return (
@@ -178,10 +176,10 @@ const NFTGallery = ({ nfts, loading, error, title }) => {
                 </div>
             )}
 
+            {/* The modal no longer needs the onPurchase prop */}
             <NFTDetailModal 
                 nft={selectedNft} 
                 onClose={() => setSelectedNft(null)}
-                onPurchase={handlePurchase}
             />
         </section>
     );
