@@ -30,13 +30,14 @@ function useAnimatedCounter(toValue) {
 
 
 const MintLive = ({ livePhase, mintedCount, totalSupply, showMessage, refresh, connection }) => {
-    // UPDATED: Get signAndSendTransaction from the useWallet hook
-    const { publicKey, signAndSendTransaction } = useWallet();
+    // UPDATED: Get the whole `wallet` object for a more robust call
+    const { wallet, publicKey } = useWallet();
     const [mintCount, setMintCount] = useState(1);
     const [isMinting, setIsMinting] = useState(false);
 
     const handleMint = async () => {
-        if (!publicKey || !signAndSendTransaction) {
+        // UPDATED: More robust check for the wallet, its adapter, and the required function
+        if (!wallet || !publicKey || !wallet.adapter?.signAndSendTransaction) {
             showMessage("Please connect your wallet to mint.", "error");
             return;
         }
@@ -45,7 +46,6 @@ const MintLive = ({ livePhase, mintedCount, totalSupply, showMessage, refresh, c
         showMessage(`Preparing to mint ${mintCount} NFT(s)...`, 'info');
 
         try {
-            // 1. Get the unsigned transaction from your backend
             const { mintTx } = await getMintTransaction(publicKey.toBase58(), mintCount, livePhase.group);
             if (!mintTx) throw new Error("Did not receive a valid transaction from the server.");
             
@@ -54,11 +54,9 @@ const MintLive = ({ livePhase, mintedCount, totalSupply, showMessage, refresh, c
             const txBuffer = Buffer.from(mintTx, "base64");
             const versionedTx = VersionedTransaction.deserialize(txBuffer);
 
-            // 2. UPDATED: Use signAndSendTransaction to let the wallet sign and send
-            // This single method replaces the separate signTransaction and sendRawTransaction calls.
-            const signature = await signAndSendTransaction(versionedTx);
+            // UPDATED: Call the function from the wallet adapter
+            const signature = await wallet.adapter.signAndSendTransaction(versionedTx);
             
-            // 3. Confirm the transaction using the returned signature
             showMessage("Confirming transaction...", "info");
             await connection.confirmTransaction(signature, "confirmed");
 
@@ -68,7 +66,6 @@ const MintLive = ({ livePhase, mintedCount, totalSupply, showMessage, refresh, c
 
         } catch (error) {
             console.error("Minting failed:", error);
-            // Handle specific case where user rejects the transaction
             if (error.name === 'WalletSendTransactionError' || error.message.includes('User rejected the request')) {
                 showMessage("Transaction rejected.", "error");
             } else {
@@ -81,7 +78,8 @@ const MintLive = ({ livePhase, mintedCount, totalSupply, showMessage, refresh, c
 
     const progress = totalSupply > 0 ? (mintedCount / totalSupply) * 100 : 0;
     const pricePerNFT = parseFloat(livePhase.price);
-    const totalCost = (mintCount * pricePerNFT).toFixed(2);
+    const totalCost = (mintCount * pricePerNFT); // Removed .toFixed() here to pass a number to the hook
+    const animatedTotalCost = useAnimatedCounter(totalCost);
 
     return (
         <motion.div
@@ -115,7 +113,7 @@ const MintLive = ({ livePhase, mintedCount, totalSupply, showMessage, refresh, c
             </div>
 
             <div className="text-center text-sm text-gray-400 -mt-4 mb-6">
-                Total: <span className="font-bold text-white">{totalCost} SOL</span> <span className="text-gray-500">(+ fee)</span>
+                Total: <span className="font-bold text-white">{animatedTotalCost} SOL</span> <span className="text-gray-500">(+ fee)</span>
             </div>
             
             <motion.button
