@@ -5,7 +5,7 @@ const PERSISTENT_API_URL = "https://lil-gargs.onrender.com";
 export const getMiningData = async (walletAddress) => {
     try {
         const response = await fetch(`${PERSISTENT_API_URL}/api/mining?walletAddress=${walletAddress}`);
-        if (response.status === 404) return null; // New user
+        if (response.status === 404) return null;
         if (!response.ok) throw new Error('Failed to fetch user mining data.');
         return await response.json();
     } catch (error) {
