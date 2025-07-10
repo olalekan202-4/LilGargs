@@ -31,21 +31,21 @@ const MintLive = ({
   refresh,
   connection,
 }) => {
-  // UPDATED: Get signAndSendTransaction from the useWallet hook
-  const { publicKey, signAndSendTransaction } = useWallet();
+  // UPDATED: Get the high-level sendTransaction function from the useWallet hook
+  const { publicKey, sendTransaction } = useWallet();
   const [mintCount, setMintCount] = useState(1);
   const [isMinting, setIsMinting] = useState(false);
 
   const handleMint = async () => {
     // UPDATED: Check for the new function
-    if (!publicKey || !signAndSendTransaction) {
+    if (!publicKey || !sendTransaction) {
       showMessage("Please connect your wallet to mint.", "error");
       return;
     }
+
     setIsMinting(true);
     showMessage(`Preparing to mint ${mintCount} NFT(s)...`, "info");
     try {
-      // 1. Get the unsigned transaction from your backend
       const { mintTx } = await getMintTransaction(
         publicKey.toBase58(),
         mintCount,
@@ -57,11 +57,10 @@ const MintLive = ({
       const txBuffer = Buffer.from(mintTx, "base64");
       const versionedTx = VersionedTransaction.deserialize(txBuffer);
 
-      // 2. UPDATED: Use the single signAndSendTransaction method
-      // This signs and sends the transaction in one step as requested by Phantom
-      const signature = await signAndSendTransaction(versionedTx);
-
-      // 3. Confirm the transaction using the returned signature
+      // UPDATED: Use the robust `sendTransaction` method from the wallet adapter
+      // It handles signing and sending in one secure step. It requires the 'connection' object.
+      const signature = await sendTransaction(versionedTx, connection);
+      
       showMessage("Confirming transaction...", "info");
       await connection.confirmTransaction(signature, "confirmed");
 
@@ -69,6 +68,7 @@ const MintLive = ({
         `Mint successful! Transaction: ${signature.substring(0, 10)}...`,
         "success"
       );
+
       if (refresh) refresh();
 
     } catch (error) {
