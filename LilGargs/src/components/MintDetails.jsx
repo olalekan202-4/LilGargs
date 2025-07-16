@@ -15,10 +15,7 @@ const MintDetails = ({ launchpadInfo, collectionNfts, loading, error }) => {
   if (error) {
     return (
       <div className="text-center p-10 bg-red-900/20 rounded-lg">
-        <p className="text-xl text-red-400">
-          Could not load launchpad details.
-        </p>
-        <p className="text-sm text-gray-400 mt-2">{error.toString()}</p>
+        <p className="text-sm text-gray-400 mt-2">Reload your Browser</p>
       </div>
     );
   }
