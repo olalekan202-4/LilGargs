@@ -173,7 +173,7 @@ const NFTGallery = ({ nfts, loading, error, title }) => {
   if (error) {
     return (
       <div className="text-center p-10 bg-red-900/20 rounded-lg">
-        <p className="text-xl text-red-400">{error.toString()}</p>
+        <p className="text-sm text-gray-400 mt-2">Reload your Browser</p>
       </div>
     );
   }
