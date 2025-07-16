@@ -1,49 +1,99 @@
 // src/api.js
-// --- API for Persistent Mining & Leaderboard ---
-const PERSISTENT_API_URL = "https://lil-gargs.onrender.com";
+import { initializeApp } from "firebase/app";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+} from "firebase/firestore";
 
-export const getMiningData = async (walletAddress) => {
-    try {
-        const response = await fetch(`${PERSISTENT_API_URL}/api/mining?walletAddress=${walletAddress}`);
-        if (response.status === 404) return null;
-        if (!response.ok) throw new Error('Failed to fetch user mining data.');
-        return await response.json();
-    } catch (error) {
-        console.error("Error fetching mining data:", error);
-        throw error;
-    }
+// --- START: FIREBASE CONFIGURATION ---
+const firebaseConfig = {
+  apiKey: "AIzaSyD6JRqQrEfp6FSvomocDgWUcknt8yWcL10",
+  authDomain: "lilgargs-52cb8.firebaseapp.com",
+  projectId: "lilgargs-52cb8",
+  storageBucket: "lilgargs-52cb8.appspot.com",
+  messagingSenderId: "764938969567",
+  appId: "1:764938969567:web:e5c64b9a64dfa259d8246a",
+  measurementId: "G-RLJCJTPSXD",
 };
 
-export const updateMiningData = async (walletAddress, miningBalance, miningRate) => {
-    try {
-        const response = await fetch(`${PERSISTENT_API_URL}/api/mining/start`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ walletAddress, miningBalance, miningRate }),
-        });
-        if (!response.ok) throw new Error('Failed to update user mining data.');
-        return await response.json();
-    } catch (error) {
-        console.error("Error updating mining data:", error);
-        throw error;
+// Initialize Firebase and Firestore
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+// --- END: FIREBASE CONFIGURATION ---
+
+// --- API for Persistent Mining & Leaderboard using Firebase ---
+
+export const getMiningData = async (walletAddress) => {
+  try {
+    const userDocRef = doc(db, "users", walletAddress);
+    const userDoc = await getDoc(userDocRef);
+
+    if (userDoc.exists()) {
+      return userDoc.data();
+    } else {
+      // This is a new user. Return null so the app knows to start them at 0.
+      return null;
     }
+  } catch (error) {
+    console.error("Error fetching mining data from Firebase:", error);
+    throw error;
+  }
+};
+
+export const updateMiningData = async (
+  walletAddress,
+  miningBalance,
+  miningRate
+) => {
+  try {
+    const userDocRef = doc(db, "users", walletAddress);
+    const dataToSave = {
+      walletAddress,
+      miningBalance,
+      miningRate,
+      sessionStartTime: new Date().toISOString(), // Use current time as the last saved time
+    };
+    // setDoc with { merge: true } will create the document if it doesn't exist,
+    // or update it if it does, without overwriting other fields.
+    await setDoc(userDocRef, dataToSave, { merge: true });
+    return { success: true, message: "Data saved to Firebase." };
+  } catch (error) {
+    console.error("Error updating mining data in Firebase:", error);
+    throw error;
+  }
 };
 
 export const getLeaderboardData = async () => {
-    try {
-        const response = await fetch(`${PERSISTENT_API_URL}/api/leaderboard`);
-        if (!response.ok) throw new Error('Failed to fetch leaderboard data.');
-        const data = await response.json();
-        return data.leaderboard || [];
-    } catch (error) {
-        console.error("Error fetching leaderboard:", error);
-        throw error;
-    }
+  try {
+    const usersRef = collection(db, "users");
+    // Query the top 100 users, ordered by their mining balance in descending order.
+    const q = query(usersRef, orderBy("miningBalance", "desc"), limit(100));
+
+    const querySnapshot = await getDocs(q);
+    const leaderboard = [];
+    let rank = 1;
+    querySnapshot.forEach((doc) => {
+      leaderboard.push({
+        rank: rank++,
+        ...doc.data(),
+      });
+    });
+    return leaderboard;
+  } catch (error) {
+    console.error("Error fetching leaderboard from Firebase:", error);
+    throw error;
+  }
 };
 
-
-// --- API for Minting (Gensuki) ---
-const GENSUKI_API_URL = "/api"; // Local proxy path
+// --- API for Minting & NFT Data (Gensuki) ---
+const GENSUKI_API_URL = "/api"; // Local proxy path for Vercel
 const GENSUKI_API_KEY = "C4nmyPkkyOnevkolNVqhV0czP";
 const PROJECT_NAME = "LilGargsOGs";
 const PROJECT_CHAIN = "Solana";
@@ -53,10 +103,17 @@ export const fetchLaunchpadData = async () => {
   try {
     const response = await fetch(`${GENSUKI_API_URL}/launchpad`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": GENSUKI_API_KEY },
-      body: JSON.stringify({ projectName: PROJECT_NAME, projectChain: PROJECT_CHAIN }),
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": GENSUKI_API_KEY,
+      },
+      body: JSON.stringify({
+        projectName: PROJECT_NAME,
+        projectChain: PROJECT_CHAIN,
+      }),
     });
-    if (!response.ok) throw new Error(`Error fetching launchpad data: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Error fetching launchpad data: ${response.status}`);
     return await response.json();
   } catch (error) {
     console.error("Failed to fetch launchpad data:", error);
@@ -65,19 +122,27 @@ export const fetchLaunchpadData = async () => {
 };
 
 export const fetchCollectionAssets = async () => {
-    try {
-      const response = await fetch(`${GENSUKI_API_URL}/assets`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": GENSUKI_API_KEY },
-        body: JSON.stringify({ collectionAddress: COLLECTION_ADDRESS, chain: PROJECT_CHAIN, projectName: PROJECT_NAME }),
-      });
-      if (!response.ok) throw new Error(`Error fetching collection assets: ${response.status}`);
-      const data = await response.json();
-      return data.nfts || [];
-    } catch (error) {
-      console.error("Failed to fetch collection assets:", error);
-      throw error;
-    }
+  try {
+    const response = await fetch(`${GENSUKI_API_URL}/assets`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": GENSUKI_API_KEY,
+      },
+      body: JSON.stringify({
+        collectionAddress: COLLECTION_ADDRESS,
+        chain: PROJECT_CHAIN,
+        projectName: PROJECT_NAME,
+      }),
+    });
+    if (!response.ok)
+      throw new Error(`Error fetching collection assets: ${response.status}`);
+    const data = await response.json();
+    return data.nfts || [];
+  } catch (error) {
+    console.error("Failed to fetch collection assets:", error);
+    throw error;
+  }
 };
 
 export const fetchUserAssets = async (userAddress) => {
@@ -85,10 +150,18 @@ export const fetchUserAssets = async (userAddress) => {
   try {
     const response = await fetch(`${GENSUKI_API_URL}/wallets`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": GENSUKI_API_KEY },
-      body: JSON.stringify({ userAddress, contractAddress: COLLECTION_ADDRESS, projectName: PROJECT_NAME }),
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": GENSUKI_API_KEY,
+      },
+      body: JSON.stringify({
+        userAddress,
+        contractAddress: COLLECTION_ADDRESS,
+        projectName: PROJECT_NAME,
+      }),
     });
-    if (!response.ok) throw new Error(`Error fetching user assets: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Error fetching user assets: ${response.status}`);
     const data = await response.json();
     return data.tokens || [];
   } catch (error) {
@@ -97,20 +170,33 @@ export const fetchUserAssets = async (userAddress) => {
   }
 };
 
-export const getMintTransaction = async (walletAddress, mintCount, group = "pb") => {
-    try {
-        const response = await fetch(`${GENSUKI_API_URL}/mint`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "x-api-key": GENSUKI_API_KEY },
-            body: JSON.stringify({ group, walletAddress, projectName: PROJECT_NAME, projectChain: PROJECT_CHAIN, mintCount }),
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Failed to get mint transaction");
-        }
-        return await response.json();
-    } catch (error) {
-        console.error("Mint API call failed:", error);
-        throw error;
+export const getMintTransaction = async (
+  walletAddress,
+  mintCount,
+  group = "pb"
+) => {
+  try {
+    const response = await fetch(`${GENSUKI_API_URL}/mint`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": GENSUKI_API_KEY,
+      },
+      body: JSON.stringify({
+        group,
+        walletAddress,
+        projectName: PROJECT_NAME,
+        projectChain: PROJECT_CHAIN,
+        mintCount,
+      }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to get mint transaction");
     }
+    return await response.json();
+  } catch (error) {
+    console.error("Mint API call failed:", error);
+    throw error;
+  }
 };
