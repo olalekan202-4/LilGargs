@@ -57,8 +57,7 @@ const MintLive = ({
       const txBuffer = Buffer.from(mintTx, "base64");
       const versionedTx = VersionedTransaction.deserialize(txBuffer);
 
-      // UPDATED: Use the robust `sendTransaction` method from the wallet adapter
-      // It handles signing and sending in one secure step. It requires the 'connection' object.
+    
       const signature = await sendTransaction(versionedTx, connection);
       
       showMessage("Confirming transaction...", "info");

@@ -29,10 +29,6 @@ export const useGensuki = (userWalletAddress) => {
 
       if (userWalletAddress) {
         const userData = await fetchUserAssets(userWalletAddress);
-
-        // --- NEW DATA ENRICHMENT LOGIC ---
-        // Create a map of the full collection data for easy and fast lookups.
-        // We assume 'mintAddress' or a similar unique ID exists on both data sets.
         const collectionMap = new Map(
           collectionData.map((nft) => [nft.mintAddress || nft.publicKey, nft])
         );

@@ -1,5 +1,5 @@
 // src/components/MessageDisplay.jsx
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const MessageDisplay = ({ message, type, onClose }) => {

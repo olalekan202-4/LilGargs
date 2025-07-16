@@ -10,7 +10,7 @@ const MintButton = ({ showMessage, refresh, launchpadInfo }) => {
     const [mintCount, setMintCount] = useState(1);
     const [isMinting, setIsMinting] = useState(false);
     // You must replace this with your own Helius RPC API Key
-    const connection = new Connection("https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY_HERE"); 
+    const connection = new Connection("https://mainnet.helius-rpc.com/?api-key=735ac8d3-af29-4a2b-ad8b-6ed013fe2a04"); 
 
     const handleMint = async () => {
         if (!publicKey || !signTransaction) {
