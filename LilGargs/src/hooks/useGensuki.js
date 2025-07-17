@@ -18,7 +18,6 @@ export const useGensuki = (userWalletAddress) => {
       setLoading(true);
       setError(null);
 
-      // Fetch both the full collection and the user's owned NFTs simultaneously
       const [launchpadData, collectionData] = await Promise.all([
         fetchLaunchpadData(),
         fetchCollectionAssets(),
@@ -30,23 +29,21 @@ export const useGensuki = (userWalletAddress) => {
       if (userWalletAddress) {
         const userData = await fetchUserAssets(userWalletAddress);
 
-        // --- DATA ENRICHMENT LOGIC ---
-        // This is the crucial step that fixes the missing descriptions.
+        // --- UPDATED & CORRECTED DATA ENRICHMENT LOGIC ---
 
-        // 1. Create a map of the full collection data for easy and fast lookups.
-        // We use 'mintAddress' or 'publicKey' as a unique identifier.
-        const collectionMap = new Map(collectionData.map(nft => [nft.mintAddress || nft.publicKey, nft]));
+        // 1. Create a map of the full collection data, using its `mintAddress` as the key.
+        const collectionMap = new Map(collectionData.map(nft => [nft.mintAddress, nft]));
 
-        // 2. Map over the user's summarized NFT data and enrich it with details from the full collection.
+        // 2. Map over the user's owned NFT data. For each owned NFT, use its `publicKey`
+        //    to find the matching full-detail NFT from the collection map.
         const hydratedUserData = userData.map(ownedNft => {
-            const fullNftData = collectionMap.get(ownedNft.mintAddress || ownedNft.publicKey);
+            const fullNftData = collectionMap.get(ownedNft.publicKey); // Match ownedNft.publicKey with collectionMap's mintAddress
             
             if (fullNftData) {
-                // If we find a match, merge the properties.
-                // The full data (like the description) will be added to the owned NFT data.
+                // If a match is found, merge the objects to add the missing description and other details.
                 return { ...ownedNft, ...fullNftData };
             }
-            // If no match is found, return the original summarized data.
+            // If no match is found, return the original data.
             return ownedNft;
         });
 
