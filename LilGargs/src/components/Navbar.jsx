@@ -1,5 +1,5 @@
 // src/components/Navbar.jsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { motion, AnimatePresence } from "framer-motion";
 import Logo from "/log.jpg";
@@ -34,10 +34,12 @@ const Navbar = ({ activeSection }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // --- UPDATED: Added "About Us" to the navItems array ---
   const navItems = [
     { href: "#mint-hub", label: "Mint" },
     { href: "#leaderboard", label: "Leaderboard" },
     { href: "#collection", label: "Collection" },
+    { href: "#about", label: "About Us" },
   ];
 
   return (

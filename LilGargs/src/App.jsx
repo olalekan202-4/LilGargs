@@ -2,7 +2,7 @@
 import { Buffer } from "buffer";
 window.Buffer = Buffer;
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
   useWallet,
   WalletProvider,
@@ -71,12 +71,12 @@ function App() {
   const connection = useMemo(
     () =>
       new Connection(
-        "https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY_HERE"
+        "https://mainnet.helius-rpc.com/?api-key=735ac8d3-af29-4a2b-ad8b-6ed013fe2a04"
       ),
     []
   );
 
-  // --- Logic for Persistent Mining Data with Firebase ---
+  // --- Logic for Persistent Mining Data ---
   useEffect(() => {
     if (!publicKey) {
       setIsMiningDataLoaded(false);
@@ -85,7 +85,6 @@ function App() {
     }
     const userAddress = publicKey.toBase58();
     setIsMiningDataLoaded(false);
-
     getMiningData(userAddress)
       .then((data) => {
         if (data && data.miningRate > 0) {
@@ -171,6 +170,7 @@ function App() {
     "mint-hub": useRef(null),
     leaderboard: useRef(null),
     collection: useRef(null),
+    about: useRef(null),
   };
 
   useEffect(() => {
@@ -235,7 +235,8 @@ function App() {
   const totalSupply = launchpadInfo?.supply || 0;
 
   return (
-    <div className="min-h-screen bg-transparent text-white flex flex-col font-sans">
+    // --- UPDATED: Added `overflow-x-hidden` to the main wrapper div ---
+    <div className="min-h-screen bg-transparent text-white flex flex-col font-sans overflow-x-hidden">
       <MessageDisplay
         message={message}
         type={messageType}
@@ -339,7 +340,10 @@ function App() {
           />
         </div>
       </main>
-      <Footer />
+
+      <div id="about" ref={sectionRefs["about"]}>
+        <Footer />
+      </div>
     </div>
   );
 }

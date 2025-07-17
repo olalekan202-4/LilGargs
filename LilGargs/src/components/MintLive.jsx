@@ -1,5 +1,5 @@
 // src/components/MintLive.jsx
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, animate } from "framer-motion";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { VersionedTransaction } from "@solana/web3.js";
@@ -31,13 +31,11 @@ const MintLive = ({
   refresh,
   connection,
 }) => {
-  // UPDATED: Get the high-level sendTransaction function from the useWallet hook
   const { publicKey, sendTransaction } = useWallet();
   const [mintCount, setMintCount] = useState(1);
   const [isMinting, setIsMinting] = useState(false);
 
   const handleMint = async () => {
-    // UPDATED: Check for the new function
     if (!publicKey || !sendTransaction) {
       showMessage("Please connect your wallet to mint.", "error");
       return;
@@ -45,39 +43,84 @@ const MintLive = ({
 
     setIsMinting(true);
     showMessage(`Preparing to mint ${mintCount} NFT(s)...`, "info");
+
+    let signature = "";
+
     try {
+      // Step 1: Get the transaction from your backend
       const { mintTx } = await getMintTransaction(
         publicKey.toBase58(),
         mintCount,
         livePhase.group
       );
-      if (!mintTx) throw new Error("Did not receive a valid transaction.");
-      
-      showMessage("Transaction received, please sign...", "info");
+      if (!mintTx)
+        throw new Error("Did not receive a valid transaction from the server.");
+
       const txBuffer = Buffer.from(mintTx, "base64");
       const versionedTx = VersionedTransaction.deserialize(txBuffer);
 
-    
-      const signature = await sendTransaction(versionedTx, connection);
-      
-      showMessage("Confirming transaction...", "info");
-      await connection.confirmTransaction(signature, "confirmed");
+      // Step 2: Send the transaction using the wallet adapter
+      showMessage("Please approve the transaction in your wallet...", "info");
+      signature = await sendTransaction(versionedTx, connection);
 
+      // Step 3: Immediately show a success message with the transaction signature (explorer link)
+      // This provides instant feedback to the user.
+      const explorerLink = `https://explorer.solana.com/tx/${signature}?cluster=mainnet-beta`;
       showMessage(
-        `Mint successful! Transaction: ${signature.substring(0, 10)}...`,
+        <span>
+          Transaction sent!{" "}
+          <a
+            href={explorerLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            View on Explorer
+          </a>
+        </span>,
         "success"
       );
 
-      if (refresh) refresh();
+      // Step 4: Wait for the final confirmation in the background
+      await connection.confirmTransaction(signature, "confirmed");
 
+      console.log("Transaction successfully confirmed!");
     } catch (error) {
       console.error("Minting failed:", error);
-       if (error.name === 'WalletSendTransactionError' || error.message.includes('User rejected the request')) {
-          showMessage("Transaction rejected.", "error");
+      if (
+        error.name === "WalletSendTransactionError" ||
+        error.message.includes("User rejected the request")
+      ) {
+        showMessage("Transaction rejected.", "error");
       } else {
+        // If there's a signature, it means the tx was sent but confirmation might have failed.
+        // We can still give the user the signature to check manually.
+        if (signature) {
+          const explorerLink = `https://explorer.solana.com/tx/${signature}?cluster=mainnet-beta`;
+          showMessage(
+            <span>
+              Confirmation timed out, but the transaction was sent.{" "}
+              <a
+                href={explorerLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                Check on Explorer
+              </a>
+            </span>,
+            "info"
+          );
+        } else {
           showMessage(error.message || "An unknown error occurred.", "error");
+        }
       }
     } finally {
+      // Step 5: Refresh the UI regardless of confirmation timeout, as the mint was likely successful.
+      if (refresh) {
+        // Adding a small delay to give the indexer time to catch up
+        setTimeout(() => refresh(), 2000);
+      }
       setIsMinting(false);
     }
   };
