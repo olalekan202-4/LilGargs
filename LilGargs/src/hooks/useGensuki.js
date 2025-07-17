@@ -1,10 +1,10 @@
 // src/hooks/useGensuki.js
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 import {
   fetchLaunchpadData,
   fetchCollectionAssets,
   fetchUserAssets,
-} from '../api';
+} from "../api";
 
 export const useGensuki = (userWalletAddress) => {
   const [launchpadInfo, setLaunchpadInfo] = useState(null);
@@ -18,57 +18,55 @@ export const useGensuki = (userWalletAddress) => {
       setLoading(true);
       setError(null);
 
+      // Fetch both the full collection and the user's owned NFTs
       const [launchpadData, collectionData] = await Promise.all([
         fetchLaunchpadData(),
         fetchCollectionAssets(),
       ]);
-      
+
       setLaunchpadInfo(launchpadData);
       setCollectionNfts(collectionData);
 
       if (userWalletAddress) {
         const userData = await fetchUserAssets(userWalletAddress);
+        const collectionMap = new Map(
+          collectionData.map((nft) => [nft.mintAddress || nft.publicKey, nft])
+        );
 
-        // --- UPDATED & CORRECTED DATA ENRICHMENT LOGIC ---
+        // Map over the user's summarized NFT data and enrich it with details from the full collection.
+        const hydratedUserData = userData.map((ownedNft) => {
+          const fullNftData = collectionMap.get(
+            ownedNft.mintAddress || ownedNft.publicKey
+          );
 
-        // 1. Create a map of the full collection data, using its `mintAddress` as the key.
-        const collectionMap = new Map(collectionData.map(nft => [nft.mintAddress, nft]));
-
-        // 2. Map over the user's owned NFT data. For each owned NFT, use its `publicKey`
-        //    to find the matching full-detail NFT from the collection map.
-        const hydratedUserData = userData.map(ownedNft => {
-            const fullNftData = collectionMap.get(ownedNft.publicKey); // Match ownedNft.publicKey with collectionMap's mintAddress
-            
-            if (fullNftData) {
-                // If a match is found, merge the objects to add the missing description and other details.
-                return { ...ownedNft, ...fullNftData };
-            }
-            // If no match is found, return the original data.
-            return ownedNft;
+          if (fullNftData) {
+            // If we find a match, merge the properties.
+            // The full data from the collection (like description) will overwrite the missing fields.
+            return { ...ownedNft, ...fullNftData };
+          }
+          // If no match is found for some reason, return the original data.
+          return ownedNft;
         });
 
         setOwnedNfts(hydratedUserData);
-
       } else {
         setOwnedNfts([]);
       }
-
     } catch (err) {
-      setError(err.message || 'An unknown error occurred.');
+      setError(err.message || "An unknown error occurred.");
       console.error("Error loading Gensuki data:", err);
     } finally {
       setLoading(false);
     }
   }, [userWalletAddress]);
 
-
   useEffect(() => {
     loadData();
   }, [loadData]);
 
   const refresh = () => {
-      loadData();
-  }
+    loadData();
+  };
 
   return { launchpadInfo, collectionNfts, ownedNfts, loading, error, refresh };
 };
