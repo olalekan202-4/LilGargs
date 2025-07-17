@@ -45,7 +45,7 @@ const Engagement = ({ unclaimedGarg, ogCount, totalMiningRate }) => {
         <motion.a
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          href="https://discord.gg/HzsdJ8fd6M"
+          href="https://discord.gg/5mdVj5t8qk"
           target="_blank"
           rel="noopener noreferrer"
           className="px-8 py-3 bg-purple-700 text-white font-bold rounded-xl shadow-lg hover:bg-purple-800 transition-colors"
