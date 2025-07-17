@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 // Receive totalMiningRate as a new prop
 const Engagement = ({ unclaimedGarg, ogCount, totalMiningRate }) => {
   const handleShare = () => {
-    const siteUrl = "YOUR_SITE_URL_HERE"; // Replace with your actual site URL
+    const siteUrl = "lilgarg.xyz";
 
     // Updated tweet text to include the mining rate
     const tweetText = `I'm mining $GARG at a rate of ${totalMiningRate.toFixed(

@@ -69,14 +69,14 @@ const MintLive = ({
       showMessage(
         <span>
           Transaction sent!{" "}
-          <a
+          {/* <a
             href={explorerLink}
             target="_blank"
             rel="noopener noreferrer"
             className="underline"
           >
             View on Explorer
-          </a>
+          </a> */}
         </span>,
         "success"
       );
