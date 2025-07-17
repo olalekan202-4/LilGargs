@@ -56,7 +56,7 @@ const Footer = () => {
             <TwitterIcon />
           </a>
           <a
-            href="https://discord.gg/HzsdJ8fd6M"
+            href="https://discord.gg/5mdVj5t8qk"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-purple-400 transition-colors"
