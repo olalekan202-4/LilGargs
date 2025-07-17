@@ -117,7 +117,7 @@ const NFTCard = ({ nft, onSelect }) => {
           />
         </div>
         <div className="p-4 flex flex-col flex-grow">
-          <h3 className="text-lg font-bold text-white truncate">
+          <h3 className="text-sm font-bold text-white truncate">
             {displayName}
           </h3>
 
