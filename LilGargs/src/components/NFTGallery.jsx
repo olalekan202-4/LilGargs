@@ -89,7 +89,7 @@ const NFTCard = ({ nft, onSelect }) => {
     if (!name) return "Unnamed NFT";
     if (name.includes("Lil Gargs OGs-legacy")) {
       const number = name.replace("Lil Gargs OGs-legacy", "").trim();
-      return `${number}`;
+      return `Lil Gargs OGs-legacy${number}`;
     }
     return name;
   };
