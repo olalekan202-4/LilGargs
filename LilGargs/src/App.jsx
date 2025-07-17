@@ -299,7 +299,7 @@ function App() {
                 nfts={ownedNfts}
                 loading={nftsLoading}
                 error={nftsError ? "Failed to load your NFTs." : null}
-                title="NFTs Minted"
+                title="MY NFTs"
               />
             </>
           ) : (
@@ -336,7 +336,7 @@ function App() {
             nfts={collectionNfts}
             loading={nftsLoading}
             error={nftsError ? "Failed to load collection NFTs." : null}
-            title="Lil Gargs OGs Collection Preview"
+            title="MINTED NFT"
           />
         </div>
       </main>
