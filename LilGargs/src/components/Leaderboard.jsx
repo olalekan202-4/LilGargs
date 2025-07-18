@@ -32,20 +32,39 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // --- UPDATED: Logic to fetch data periodically ---
   useEffect(() => {
-    setIsLoading(true);
-    getLeaderboardData()
-      .then((data) => {
-        setLeaderboardData(data);
-      })
-      .catch((err) => {
-        console.error("Failed to load leaderboard:", err);
-        setError("Could not load leaderboard data.");
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, []);
+    const fetchData = () => {
+      // Don't show loading spinner on background refreshes, only on the initial load.
+      // setIsLoading(true); // This would cause a flicker every refresh.
+
+      getLeaderboardData()
+        .then((data) => {
+          setLeaderboardData(data);
+          setError(null); // Clear any previous errors on a successful fetch
+        })
+        .catch((err) => {
+          console.error("Failed to load leaderboard:", err);
+          setError("Could not load leaderboard data.");
+        })
+        .finally(() => {
+          // Only set loading to false on the very first fetch.
+          if (isLoading) {
+            setIsLoading(false);
+          }
+        });
+    };
+
+    // 1. Fetch data immediately when the component loads.
+    fetchData();
+
+    // 2. Set up an interval to refetch the data every 15 minutes (900,000 milliseconds).
+    const intervalId = setInterval(fetchData, 15 * 60 * 1000);
+
+    // 3. Return a cleanup function to clear the interval when the component is unmounted.
+    // This is crucial to prevent memory leaks.
+    return () => clearInterval(intervalId);
+  }, [isLoading]); // We keep `isLoading` here to control the initial load state.
 
   const totalMined = useMemo(() => {
     if (!leaderboardData) return 0;
