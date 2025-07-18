@@ -34,7 +34,8 @@ import GargShop from "./components/GargShop";
 import { useGensuki } from "./hooks/useGensuki";
 import { getMiningData, updateMiningData } from "./api";
 
-const network = "https://mainnet.helius-rpc.com/?api-key=735ac8d3-af29-4a2b-ad8b-6ed013fe2a04";
+const network =
+  "https://mainnet.helius-rpc.com/?api-key=735ac8d3-af29-4a2b-ad8b-6ed013fe2a04";
 const MINING_RATE_PER_NFT = 0.0005775;
 
 function App() {

@@ -32,12 +32,9 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // --- UPDATED: Logic to fetch data periodically ---
+  // ---Logic to fetch data periodically ---
   useEffect(() => {
     const fetchData = () => {
-      // Don't show loading spinner on background refreshes, only on the initial load.
-      // setIsLoading(true); // This would cause a flicker every refresh.
-
       getLeaderboardData()
         .then((data) => {
           setLeaderboardData(data);
@@ -62,9 +59,8 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
     const intervalId = setInterval(fetchData, 15 * 60 * 1000);
 
     // 3. Return a cleanup function to clear the interval when the component is unmounted.
-    // This is crucial to prevent memory leaks.
     return () => clearInterval(intervalId);
-  }, [isLoading]); // We keep `isLoading` here to control the initial load state.
+  }, [isLoading]);
 
   const totalMined = useMemo(() => {
     if (!leaderboardData) return 0;

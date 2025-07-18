@@ -62,7 +62,11 @@ const Footer = () => {
             className="text-gray-400 hover:text-purple-400 transition-colors"
             aria-label="Discord"
           >
-            <img src='https://img.icons8.com/?size=100&id=65646&format=png&color=000000' alt="discord" className='h-10 w-10' />
+            <img
+              src="https://img.icons8.com/?size=100&id=65646&format=png&color=000000"
+              alt="discord"
+              className="h-10 w-10"
+            />
           </a>
         </div>
 

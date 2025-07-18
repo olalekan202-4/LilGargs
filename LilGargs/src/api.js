@@ -12,7 +12,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 
-// --- START: FIREBASE CONFIGURATION ---
+//FIREBASE CONFIGURATION
 const firebaseConfig = {
   apiKey: "AIzaSyD6JRqQrEfp6FSvomocDgWUcknt8yWcL10",
   authDomain: "lilgargs-52cb8.firebaseapp.com",
@@ -38,7 +38,7 @@ export const getMiningData = async (walletAddress) => {
     if (userDoc.exists()) {
       return userDoc.data();
     } else {
-      // This is a new user. Return null so the app knows to start them at 0.
+      // This is a new user
       return null;
     }
   } catch (error) {
@@ -60,8 +60,7 @@ export const updateMiningData = async (
       miningRate,
       sessionStartTime: new Date().toISOString(), // Use current time as the last saved time
     };
-    // setDoc with { merge: true } will create the document if it doesn't exist,
-    // or update it if it does, without overwriting other fields.
+
     await setDoc(userDocRef, dataToSave, { merge: true });
     return { success: true, message: "Data saved to Firebase." };
   } catch (error) {
@@ -73,7 +72,6 @@ export const updateMiningData = async (
 export const getLeaderboardData = async () => {
   try {
     const usersRef = collection(db, "users");
-    // Query the top 100 users, ordered by their mining balance in descending order.
     const q = query(usersRef, orderBy("miningBalance", "desc"), limit(100));
 
     const querySnapshot = await getDocs(q);
@@ -93,7 +91,7 @@ export const getLeaderboardData = async () => {
 };
 
 // --- API for Minting & NFT Data (Gensuki) ---
-const GENSUKI_API_URL = "/api"; // Local proxy path for Vercel
+const GENSUKI_API_URL = "/api";
 const GENSUKI_API_KEY = "C4nmyPkkyOnevkolNVqhV0czP";
 const PROJECT_NAME = "LilGargsOGs";
 const PROJECT_CHAIN = "Solana";
