@@ -35,6 +35,8 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
   // ---Logic to fetch data periodically ---
   useEffect(() => {
     const fetchData = () => {
+      // Set loading to true at the start of each fetch
+      setIsLoading(true); // Add this line
       getLeaderboardData()
         .then((data) => {
           setLeaderboardData(data);
@@ -45,22 +47,19 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
           setError("Could not load leaderboard data.");
         })
         .finally(() => {
-          // Only set loading to false on the very first fetch.
-          if (isLoading) {
-            setIsLoading(false);
-          }
+          setIsLoading(false); // Ensure loading is set to false after fetch
         });
     };
 
-    // 1. Fetch data immediately when the component loads.
+    // 1. Fetch data immediately when the component loads or userWalletAddress changes.
     fetchData();
 
     // 2. Set up an interval to refetch the data every 15 minutes (900,000 milliseconds).
     const intervalId = setInterval(fetchData, 0.1 * 60 * 1000);
 
     // 3. Return a cleanup function to clear the interval when the component is unmounted.
-    return () => clearInterval(intervalId);
-  }, [isLoading]);
+    // Add userWalletAddress to the dependency array.
+  }, [userWalletAddress]); // Changed: Added userWalletAddress here
 
   const totalMined = useMemo(() => {
     if (!leaderboardData) return 0;
@@ -108,9 +107,9 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
                 const displayAddress = `${miner.walletAddress.substring(
                   0,
                   4
-                )}...${miner.walletAddress.substring(
+                )}...${miner.walletAddress.length > 8 ? miner.walletAddress.substring(
                   miner.walletAddress.length - 4
-                )}`;
+                ) : ''}`; // Added a check for length before substring
                 const ogsOwned = Math.round(
                   miner.miningRate / MINING_RATE_PER_NFT
                 );
