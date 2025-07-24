@@ -53,7 +53,7 @@ const REOWN_PROJECT_ID = "bfca5223118cfa2437031e3b35775f1d"; // Your project ID
 const reownMetadata = {
   name: "Lil Gargs",
   description: "Elemental Guardians Reborn.",
-  url: "https://gensuki.xyz",
+  url: "https://www.gensuki.xyz",
   icons: ["/log.jpg"],
 };
 
