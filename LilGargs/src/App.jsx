@@ -49,12 +49,12 @@ const solanaWeb3JsAdapter = new SolanaAdapter();
 // 1. Get projectId from https://dashboard.reown.com
 const REOWN_PROJECT_ID = "bfca5223118cfa2437031e3b35775f1d"; // Your project ID
 
-// 2. Create a metadata object - crucial for `appDomain` (which is `url` here)
+// 2. Create a metadata object
 const reownMetadata = {
   name: "Lil Gargs",
   description: "Elemental Guardians Reborn.",
-  url: "https://gensuki.xyz", // This is the crucial part to trick Phantom
-  icons: ["/log.jpg"], // You can use your existing logo or a placeholder
+  url: "https://gensuki.xyz",
+  icons: ["/log.jpg"],er
 };
 
 // 3. Initialize Reown AppKit
