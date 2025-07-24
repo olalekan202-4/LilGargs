@@ -56,7 +56,7 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
     fetchData();
 
     // 2. Set up an interval to refetch the data every 15 minutes (900,000 milliseconds).
-    const intervalId = setInterval(fetchData, 15 * 60 * 1000);
+    const intervalId = setInterval(fetchData, 0.1 * 60 * 1000);
 
     // 3. Return a cleanup function to clear the interval when the component is unmounted.
     return () => clearInterval(intervalId);
