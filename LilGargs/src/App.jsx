@@ -17,6 +17,11 @@ import {
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { motion } from "framer-motion";
 
+// --- Reown AppKit Imports ---
+import { createAppKit } from "@reown/appkit/react"; //
+import { SolanaAdapter } from "@reown/appkit-adapter-solana/react"; //
+import { solana, solanaTestnet, solanaDevnet } from "@reown/appkit/networks"; //
+
 // --- Core Components ---
 import Hero from "./components/Hero";
 import Navbar from "./components/Navbar";
@@ -37,6 +42,33 @@ import { getMiningData, updateMiningData } from "./api";
 const network =
   "https://mainnet.helius-rpc.com/?api-key=735ac8d3-af29-4a2b-ad8b-6ed013fe2a04";
 const MINING_RATE_PER_NFT = 0.0005775;
+
+// 0. Set up Solana Adapter
+const solanaWeb3JsAdapter = new SolanaAdapter();
+
+// 1. Get projectId from https://dashboard.reown.com
+const REOWN_PROJECT_ID = "bfca5223118cfa2437031e3b35775f1d"; // Your project ID
+
+// 2. Create a metadata object - crucial for `appDomain` (which is `url` here)
+const reownMetadata = {
+  name: "Lil Gargs",
+  description: "Elemental Guardians Reborn.",
+  url: "https://gensuki.xyz", // This is the crucial part to trick Phantom
+  icons: ["/log.jpg"], // You can use your existing logo or a placeholder
+};
+
+// 3. Initialize Reown AppKit
+// This function sets up the Reown context and modals.
+// It does NOT return an object to be used directly like `new Reown(...)`
+createAppKit({
+  adapters: [solanaWeb3JsAdapter],
+  networks: [solana, solanaTestnet, solanaDevnet],
+  metadata: reownMetadata,
+  projectId: REOWN_PROJECT_ID,
+  features: {
+    analytics: true,
+  },
+});
 
 function App() {
   const wallet = useWallet();
@@ -349,6 +381,7 @@ function App() {
   );
 }
 
+// Ensure wallets are defined before `AppWithProvider`
 const wallets = [new PhantomWalletAdapter(), new SolflareWalletAdapter()];
 
 export default function AppWithProvider() {
@@ -357,6 +390,7 @@ export default function AppWithProvider() {
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
+          {/* Your main App component is rendered here */}
           <App />
         </WalletModalProvider>
       </WalletProvider>
