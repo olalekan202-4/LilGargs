@@ -1,5 +1,5 @@
 // src/components/Leaderboard.jsx
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react"; // Added useRef
 import { motion } from "framer-motion";
 import { getLeaderboardData } from "../api";
 
@@ -32,34 +32,41 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Use a ref to track if it's the very first load
+  const isInitialLoad = useRef(true); // Added
+
   // ---Logic to fetch data periodically ---
   useEffect(() => {
     const fetchData = () => {
-      // Set loading to true at the start of each fetch
-      setIsLoading(true); // Add this line
+      // Only set loading to true for the *initial* fetch
+      if (isInitialLoad.current) { // Modified
+        setIsLoading(true); // Modified
+      }
       getLeaderboardData()
         .then((data) => {
           setLeaderboardData(data);
-          setError(null); // Clear any previous errors on a successful fetch
+          setError(null);
         })
         .catch((err) => {
           console.error("Failed to load leaderboard:", err);
           setError("Could not load leaderboard data.");
         })
         .finally(() => {
-          setIsLoading(false); // Ensure loading is set to false after fetch
+          // Always set loading to false after a fetch completes
+          setIsLoading(false); // Modified
+          isInitialLoad.current = false; // Mark initial load as complete
         });
     };
 
-    // 1. Fetch data immediately when the component loads or userWalletAddress changes.
+    // Fetch data immediately when the component mounts or userWalletAddress changes
     fetchData();
 
-    // 2. Set up an interval to refetch the data every 15 minutes (900,000 milliseconds).
+    // Set up an interval to refetch the data every 6 seconds (0.1 * 60 * 1000 milliseconds)
     const intervalId = setInterval(fetchData, 0.1 * 60 * 1000);
 
-    // 3. Return a cleanup function to clear the interval when the component is unmounted.
-    // Add userWalletAddress to the dependency array.
-  }, [userWalletAddress]); // Changed: Added userWalletAddress here
+    // Cleanup function
+    return () => clearInterval(intervalId);
+  }, [userWalletAddress]); // Keep userWalletAddress as dependency
 
   const totalMined = useMemo(() => {
     if (!leaderboardData) return 0;
@@ -88,7 +95,7 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
             </tr>
           </thead>
           <tbody>
-            {isLoading ? (
+            {isLoading && leaderboardData.length === 0 ? ( // Modified condition
               <tr>
                 <td colSpan="4" className="text-center p-8 text-gray-400">
                   Loading...
@@ -109,7 +116,7 @@ const Leaderboard = ({ userWalletAddress, purchasedFlairs = {} }) => {
                   4
                 )}...${miner.walletAddress.length > 8 ? miner.walletAddress.substring(
                   miner.walletAddress.length - 4
-                ) : ''}`; // Added a check for length before substring
+                ) : ''}`;
                 const ogsOwned = Math.round(
                   miner.miningRate / MINING_RATE_PER_NFT
                 );
