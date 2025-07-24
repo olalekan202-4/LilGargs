@@ -54,7 +54,7 @@ const reownMetadata = {
   name: "Lil Gargs",
   description: "Elemental Guardians Reborn.",
   url: "https://gensuki.xyz",
-  icons: ["/log.jpg"],er
+  icons: ["/log.jpg"],
 };
 
 // 3. Initialize Reown AppKit
